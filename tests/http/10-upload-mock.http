@@ -1,0 +1,9 @@
+POST http://localhost:8080/api/configurations
+Content-Type: multipart/form-data; boundary=Boundary
+
+--Boundary
+Content-Disposition: form-data; name="configuration"; filename="mock-jsonplaceholder.yaml"
+Content-Type: application/yaml
+
+< ../../src/main/resources/templates/mock-jsonplaceholder.yaml
+--Boundary--

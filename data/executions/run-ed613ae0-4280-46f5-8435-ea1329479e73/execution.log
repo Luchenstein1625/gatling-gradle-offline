@@ -1,0 +1,50 @@
+=== GATLING TEST EXECUTION START ===
+Execution ID: run-ed613ae0-4280-46f5-8435-ea1329479e73
+Simulation Class: bci.cards.simulation.SimpleTest
+Config File: /app/data/executions/run-ed613ae0-4280-46f5-8435-ea1329479e73/configuration.yaml
+Users File: /app/data/executions/run-ed613ae0-4280-46f5-8435-ea1329479e73/users.csv (exists: false)
+Java Command: java
+Classpath: /opt/gatling/classes:/opt/gatling/lib/*
+Working Dir: /app/data/executions/run-ed613ae0-4280-46f5-8435-ea1329479e73
+========================================
+
+Picked up JAVA_TOOL_OPTIONS: -XX:+UseG1GC -Xms32m -Xmx160m -XX:MaxMetaspaceSize=128m
+Jul 17, 2026 8:40:20 PM java.util.prefs.FileSystemPreferences$1 run
+INFO: Created user preferences directory.
+Simulation bci.cards.simulation.SimpleTest started...
+
+========================================================================================================================
+2026-07-17 20:40:26 GMT                                                                               0s elapsed
+---- Requests -----------------------------------------------------------------------|---Total---|-----OK----|----KO----
+> Global                                                                             |         1 |         1 |         0
+> GET                                                                                |         1 |         1 |         0
+
+---- Simple Test -------------------------------------------------------------------------------------------------------
+[###############################################################################################################]   100%
+          waiting:         0 / active:         0  / done:         1
+========================================================================================================================
+
+Parsing log file(s)...
+Parsing log file(s) done in 0s.
+Generating reports...
+
+========================================================================================================================
+---- Global Information -------------------------------------------------------------|---Total---|-----OK----|----KO----
+> request count                                                                      |         1 |         1 |         -
+> min response time (ms)                                                             |       574 |       574 |         -
+> max response time (ms)                                                             |       574 |       574 |         -
+> mean response time (ms)                                                            |       574 |       574 |         -
+> response time std deviation (ms)                                                   |         0 |         0 |         -
+> response time 50th percentile (ms)                                                 |       574 |       574 |         -
+> response time 75th percentile (ms)                                                 |       574 |       574 |         -
+> response time 95th percentile (ms)                                                 |       574 |       574 |         -
+> response time 99th percentile (ms)                                                 |       574 |       574 |         -
+> mean throughput (rps)                                                              |         1 |         1 |         -
+---- Response Time Distribution ----------------------------------------------------------------------------------------
+> OK: t < 800 ms                                                                                              1   (100%)
+> OK: 800 ms <= t < 1200 ms                                                                                   0     (0%)
+> OK: t >= 1200 ms                                                                                            0     (0%)
+> KO                                                                                                          0     (0%)
+========================================================================================================================
+
+Reports generated, please open the following file: file:///app/data/executions/run-ed613ae0-4280-46f5-8435-ea1329479e73/results/simpletest-20260717204024599/index.html

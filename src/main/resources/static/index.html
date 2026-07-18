@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Gatling Control API</title>
+  <style>
+    body{font-family:system-ui;margin:0;background:#f4f6f8;color:#17202a}
+    header{background:#111827;color:white;padding:22px}
+    main{max-width:1000px;margin:auto;padding:20px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+    .card{background:white;border-radius:12px;padding:18px;box-shadow:0 2px 10px #0001}
+    button,a.btn{background:#2563eb;color:white;border:0;border-radius:8px;padding:10px 14px;text-decoration:none;cursor:pointer}
+    input,select{width:100%;margin:7px 0 12px;padding:9px;box-sizing:border-box}
+    pre{background:#0b1020;color:#d1fae5;padding:12px;border-radius:8px;height:280px;overflow:auto;white-space:pre-wrap}
+    .status{font-weight:700}
+  </style>
+</head>
+<body>
+<header>
+  <h1>Gatling Control API</h1>
+  <div>Java + Spring Boot + Scala + Gatling</div>
+</header>
+<main>
+  <div class="grid">
+    <section class="card">
+      <h2>1. Plantilla</h2>
+      <select id="template">
+        <option value="peak-login">PEAK + Login</option>
+        <option value="tps-login">TPS + Login</option>
+        <option value="peak-external-token">PEAK + Token externo</option>
+        <option value="tps-external-token">TPS + Token externo</option>
+        <option value="mock-jsonplaceholder">Mock público JSONPlaceholder</option>
+        <option value="mock-httpbin">Mock público HTTPBin</option>
+      </select>
+      <button onclick="downloadTemplate()">Descargar</button>
+      <a class="btn" href="#" onclick="window.open(CTX+'/docs','_blank')">Swagger</a>
+    </section>
+
+    <section class="card">
+      <h2>✨ 1b. Upload Scala Dinámico</h2>
+      <label><strong>Archivo .scala (simulación personalizada)</strong></label>
+      <input id="scalaFile" type="file" accept=".scala" onchange="document.getElementById('scalaStatus').textContent='-'">
+      <label>Configuración YAML (opcional)</label>
+      <input id="scalaConfig" type="file" accept=".yaml,.yml">
+      <label>Modo de simulación</label>
+      <select id="simulationMode">
+        <option value="LOAD">LOAD (TPS constante)</option>
+        <option value="PEAK">PEAK (carga máxima)</option>
+        <option value="SMOKE">SMOKE (prueba rápida)</option>
+      </select>
+      <button onclick="uploadAndExecuteScala()" style="background:#10b981">Compilar y Ejecutar</button>
+      <p>Estado: <span id="scalaStatus" class="status">-</span></p>
+    </section>
+
+    <section class="card">
+      <h2>2. Subir configuración</h2>
+      <label>YAML</label>
+      <input id="config" type="file" accept=".yaml,.yml">
+      <label>CSV de usuarios (obligatorio para BCIMS; no requerido para mocks)</label>
+      <input id="users" type="file" accept=".csv">
+      <a class="btn" href="#" onclick="location.href=CTX+'/api/templates/users-csv'">Plantilla CSV</a>
+      <button onclick="upload()">Subir</button>
+      <p>Configuration ID: <span id="configId" class="status">-</span></p>
+    </section>
+
+    <section class="card">
+      <h2>3. Ejecutar</h2>
+      <button onclick="execute()">Ejecutar prueba</button>
+      <p>Execution ID: <span id="executionId" class="status">-</span></p>
+      <p>Estado: <span id="status" class="status">-</span></p>
+      <button onclick="downloadReport()">Descargar reporte</button>
+    </section>
+
+    <section class="card">
+      <h2>4. Recursos</h2>
+      <button onclick="resources()">Actualizar</button>
+      <pre id="resources"></pre>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top:16px">
+    <h2>5. Log en vivo</h2>
+    <pre id="logs"></pre>
+  </section>
+
+  <section class="card" style="margin-top:16px">
+    <h2>6. Estado Vault (Secrets)</h2>
+    <div style="padding:12px;border-radius:8px;background:#f0fdf4;border-left:4px solid #22c55e">
+      <p><strong>Status:</strong> <span id="vaultStatus" class="status">-</span></p>
+      <p><strong>Host:</strong> <span id="vaultHost">-</span></p>
+      <p><strong>Token:</strong> <span id="vaultToken" style="font-family:monospace;color:#dc2626;background:#fef2f2;padding:4px 8px;border-radius:4px">-</span></p>
+      <p><strong>App:</strong> <span id="vaultApp">-</span></p>
+      <p><strong>Secret Path:</strong> <span id="vaultPath">-</span></p>
+      <button onclick="checkVaultStatus()" style="margin-top:8px">Actualizar</button>
+    </div>
+  </section>
+</main>
+<script>
+let configurationId, executionId, events;
+const CTX = window.location.pathname.replace(/\/$/, '');
+
+function downloadTemplate(){
+  location.href=CTX+'/api/templates/'+document.getElementById('template').value;
+}
+async function upload(){
+  const form=new FormData();
+  form.append('configuration',document.getElementById('config').files[0]);
+  const users=document.getElementById('users').files[0];
+  if(users) form.append('users',users);
+  const r=await fetch(CTX+'/api/configurations',{method:'POST',body:form});
+  const j=await r.json();
+  if(!r.ok) return alert(j.error||'Error');
+  configurationId=j.configurationId;
+  document.getElementById('configId').textContent=configurationId;
+}
+
+// ✨ Nuevo: Upload + Compile + Execute Scala
+async function uploadAndExecuteScala(){
+  const scalaFile=document.getElementById('scalaFile').files[0];
+  if(!scalaFile) return alert('Selecciona un archivo .scala');
+  if(!scalaFile.name.endsWith('.scala')) return alert('Solo archivos .scala son permitidos');
+  
+  const statusEl=document.getElementById('scalaStatus');
+  statusEl.textContent='⏳ Compilando y ejecutando...';
+  
+  const form=new FormData();
+  form.append('scalaFile',scalaFile);
+  
+  const config=document.getElementById('scalaConfig').files[0];
+  if(config) form.append('configYaml',config);
+  
+  const mode=document.getElementById('simulationMode').value;
+  form.append('simulationMode',mode);
+  
+  try{
+    const r=await fetch(CTX+'/api/upload-and-execute',{method:'POST',body:form});
+    const j=await r.json();
+    
+    if(!r.ok){
+      statusEl.textContent='❌ '+( j.error||j.message||'Error desconocido');
+      return alert(j.error||j.message||'Error en compilación');
+    }
+    
+    executionId=j.executionId;
+    document.getElementById('executionId').textContent=executionId;
+    statusEl.textContent='✅ Compilado. Ejecutando: '+j.simulationClass;
+    
+    // Cambiar a tab de ejecución
+    document.getElementById('status').textContent='RUNNING';
+    stream();
+    poll();
+  }catch(e){
+    statusEl.textContent='❌ Error: '+e.message;
+    alert('Error: '+e.message);
+  }
+}
+
+async function execute(){
+  if(!configurationId) return alert('Sube una configuración');
+  const r=await fetch(CTX+'/api/executions/'+configurationId,{method:'POST'});
+  const j=await r.json();
+  if(!r.ok) return alert(j.error||'Error');
+  executionId=j.executionId;
+  document.getElementById('executionId').textContent=executionId;
+  stream();
+  poll();
+}
+function stream(){
+  if(events) events.close();
+  const logs=document.getElementById('logs');
+  logs.textContent='';
+  events=new EventSource(CTX+'/api/executions/'+executionId+'/logs/stream');
+  events.addEventListener('log',e=>{
+    logs.textContent+=e.data+'\n';
+    logs.scrollTop=logs.scrollHeight;
+  });
+}
+async function poll(){
+  if(!executionId) return;
+  const r=await fetch(CTX+'/api/executions/'+executionId);
+  const j=await r.json();
+  document.getElementById('status').textContent=j.status||j.error;
+  if(['QUEUED','RUNNING','GENERATING_REPORT'].includes(j.status)){
+    setTimeout(poll,2000);
+  }
+}
+function downloadReport(){
+  if(!executionId) return alert('No hay ejecución');
+  location.href=CTX+'/api/executions/'+executionId+'/report';
+}
+async function resources(){
+  const r=await fetch(CTX+'/api/system/resources');
+  document.getElementById('resources').textContent=
+    JSON.stringify(await r.json(),null,2);
+}
+
+// ✨ Nuevo: Validar conexión a Vault
+async function checkVaultStatus(){
+  try{
+    const r=await fetch(CTX+'/api/vault/status');
+    const j=await r.json();
+    
+    const statusEl=document.getElementById('vaultStatus');
+    const hostEl=document.getElementById('vaultHost');
+    const tokenEl=document.getElementById('vaultToken');
+    const appEl=document.getElementById('vaultApp');
+    const pathEl=document.getElementById('vaultPath');
+    
+    const isConnected=j.status==='CONNECTED';
+    statusEl.textContent=j.status||'UNKNOWN';
+    statusEl.style.color=isConnected?'#22c55e':'#dc2626';
+    statusEl.style.fontWeight='bold';
+    
+    hostEl.textContent=j.host||'-';
+    tokenEl.textContent=j.token||'Token No Disponible';
+    tokenEl.style.color=j.tokenAvailable?'#22c55e':'#dc2626';
+    appEl.textContent=j.applicationName||'-';
+    pathEl.textContent=j.secretPath||'-';
+  }catch(e){
+    console.error('Error checking Vault status:',e);
+    document.getElementById('vaultStatus').textContent='ERROR: '+e.message;
+    document.getElementById('vaultToken').textContent='Token No Disponible';
+  }
+}
+
+resources();
+checkVaultStatus();
+</script>
+</body>
+</html>

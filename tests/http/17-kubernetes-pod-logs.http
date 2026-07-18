@@ -1,0 +1,2 @@
+GET http://localhost:8080/api/kubernetes/pod/logs
+Accept: text/plain

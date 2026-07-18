@@ -1,0 +1,53 @@
+services:
+  gatling-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: gatling-control-api:secure-cve-patched
+    container_name: gatling-control-api
+    ports:
+      - "8080:8080"
+    environment:
+      APP_DATA_ROOT: /app/data
+      RESULTS_DIR: /app/data/executions
+      API_PREFIX: /gatling/gatling-gen3-app/v0.1
+      # JVM tuning sobreescribible por ambiente
+      JAVA_TOOL_OPTIONS: "-XX:+UseG1GC -Xms32m -Xmx160m -XX:MaxMetaspaceSize=128m"
+
+      # Secretos y configuración BCI.
+      BCI_LOGIN_URL: ${BCI_LOGIN_URL:-}
+      BCI_LOGIN_BASIC_AUTH: ${BCI_LOGIN_BASIC_AUTH:-}
+      BCI_LOGIN_APPLICATION_ID: ${BCI_LOGIN_APPLICATION_ID:-Pruebas de Rendimiento Andes Cert}
+      BCI_LOGIN_CHANNEL: ${BCI_LOGIN_CHANNEL:-910}
+      BCI_LOGIN_REFERENCE_SERVICE: ${BCI_LOGIN_REFERENCE_SERVICE:-Pruebas de Rendimiento Andes Cert}
+      BCI_LOGIN_REFERENCE_OPERATION: ${BCI_LOGIN_REFERENCE_OPERATION:-111}
+      BCI_LOGIN_ORIGIN_ADDR: ${BCI_LOGIN_ORIGIN_ADDR:-111}
+      BCI_LOGIN_COOKIE: ${BCI_LOGIN_COOKIE:-}
+      BCI_LOGIN_X_IBM_CLIENT_ID: ${BCI_LOGIN_X_IBM_CLIENT_ID:-}
+      BCI_LOGIN_CLIENT_ID: ${BCI_LOGIN_CLIENT_ID:-}
+
+      BCI_API_BASE_URL: ${BCI_API_BASE_URL:-}
+      BCI_API_APPLICATION_ID: ${BCI_API_APPLICATION_ID:-postman}
+      BCI_API_CHANNEL: ${BCI_API_CHANNEL:-910}
+      BCI_API_REFERENCE_SERVICE: ${BCI_API_REFERENCE_SERVICE:-postman}
+      BCI_API_REFERENCE_OPERATION: ${BCI_API_REFERENCE_OPERATION:-postman}
+      BCI_API_ORIGIN_ADDR: ${BCI_API_ORIGIN_ADDR:-127.0.0.1}
+      BCI_API_TOKEN: ${BCI_API_TOKEN:-}
+
+    volumes:
+      - ./data:/app/data
+    networks:
+      - gatling-network
+    # Permite acceder a servicios corriendo en el host (e.g. APIs target)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/gatling/gatling-gen3-app/v0.1/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+networks:
+  gatling-network:
+    driver: bridge

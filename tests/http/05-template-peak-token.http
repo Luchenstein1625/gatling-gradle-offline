@@ -1,0 +1,2 @@
+GET http://localhost:8080/api/templates/peak-external-token
+Accept: application/yaml

@@ -1,0 +1,55 @@
+=== GATLING TEST EXECUTION START ===
+Execution ID: run-c9f59641-4e36-4824-a7b4-820f9e81c49a
+Simulation Class: bci.cards.simulation.BciLoginBusinessSmokeSimulation
+Config File: /app/data/executions/run-c9f59641-4e36-4824-a7b4-820f9e81c49a/configuration.yaml
+Users File: /app/data/executions/run-c9f59641-4e36-4824-a7b4-820f9e81c49a/users.csv (exists: false)
+Java Command: java
+Classpath: /opt/gatling/classes:/opt/gatling/lib/*
+Working Dir: /app/data/executions/run-c9f59641-4e36-4824-a7b4-820f9e81c49a
+========================================
+
+Picked up JAVA_TOOL_OPTIONS: -XX:+UseG1GC -Xms32m -Xmx160m -XX:MaxMetaspaceSize=128m
+Simulation bci.cards.simulation.BciLoginBusinessSmokeSimulation started...
+
+========================================================================================================================
+2026-07-17 20:43:06 GMT                                                                               1s elapsed
+---- Requests -----------------------------------------------------------------------|---Total---|-----OK----|----KO----
+> Global                                                                             |         2 |         1 |         1
+> POST Login - client_credentials                                                    |         1 |         1 |         0
+> GET Tarjetas Persona - Diagnostico                                                 |         1 |         0 |         1
+---- Errors ------------------------------------------------------------------------------------------------------------
+> status.find.is(200), found 401                                                                              1   (100%)
+
+---- Smoke Integrado - Login + Negocio ---------------------------------------------------------------------------------
+[###############################################################################################################]   100%
+          waiting:         0 / active:         0  / done:         1
+========================================================================================================================
+
+Parsing log file(s)...
+Parsing log file(s) done in 0s.
+Generating reports...
+
+========================================================================================================================
+---- Global Information -------------------------------------------------------------|---Total---|-----OK----|----KO----
+> request count                                                                      |         2 |         1 |         1
+> min response time (ms)                                                             |       386 |       386 |       415
+> max response time (ms)                                                             |       415 |       386 |       415
+> mean response time (ms)                                                            |       401 |       386 |       415
+> response time std deviation (ms)                                                   |        15 |         0 |         0
+> response time 50th percentile (ms)                                                 |       415 |       386 |       415
+> response time 75th percentile (ms)                                                 |       415 |       386 |       415
+> response time 95th percentile (ms)                                                 |       415 |       386 |       415
+> response time 99th percentile (ms)                                                 |       415 |       386 |       415
+> mean throughput (rps)                                                              |         1 |       0.5 |       0.5
+---- Response Time Distribution ----------------------------------------------------------------------------------------
+> OK: t < 800 ms                                                                                              1    (50%)
+> OK: 800 ms <= t < 1200 ms                                                                                   0     (0%)
+> OK: t >= 1200 ms                                                                                            0     (0%)
+> KO                                                                                                          1    (50%)
+---- Errors ------------------------------------------------------------------------------------------------------------
+> status.find.is(200), found 401                                                                              1   (100%)
+========================================================================================================================
+
+Reports generated, please open the following file: file:///app/data/executions/run-c9f59641-4e36-4824-a7b4-820f9e81c49a/results/bciloginbusinesssmokesimulation-20260717204304360/index.html
+Global: count of failed events is 0.0 : false (actual : 1.0)
+Global: max of response time is less than 5000.0 : true (actual : 415.0)

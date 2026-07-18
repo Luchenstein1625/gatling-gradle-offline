@@ -1,0 +1,2 @@
+GET http://localhost:8080/api/executions/REEMPLAZAR_EXECUTION_ID/logs/stream
+Accept: text/event-stream

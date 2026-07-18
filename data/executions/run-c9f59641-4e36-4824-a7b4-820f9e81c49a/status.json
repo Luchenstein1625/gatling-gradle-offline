@@ -1,0 +1,10 @@
+{
+  "executionId" : "run-c9f59641-4e36-4824-a7b4-820f9e81c49a",
+  "configurationId" : "cfg-ac14b42e-dc92-4a84-8f34-7ca61ab7ebd5",
+  "status" : "TEST_FAILED",
+  "exitCode" : 2,
+  "failureType" : "ASSERTION_FAILURE",
+  "message" : "Prueba finalizada con errores (exit code: 2, ASSERTION_FAILURE)",
+  "startedAt" : "2026-07-17T20:42:58.636490619Z",
+  "finishedAt" : "2026-07-17T20:43:09.188582867Z"
+}

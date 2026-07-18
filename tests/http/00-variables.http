@@ -1,0 +1,3 @@
+@baseUrl = http://localhost:8080
+@configurationId = REEMPLAZAR_CONFIGURATION_ID
+@executionId = REEMPLAZAR_EXECUTION_ID

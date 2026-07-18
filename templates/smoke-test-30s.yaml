@@ -1,0 +1,25 @@
+name: Smoke Test 30s
+simulationClass: bci.cards.simulation.BciLoginSmokeSimulation
+mode: login
+environment:
+  BCI_LOGIN_URL: https://bci-api-crt001.internal.bci.cl/operaciones/seguridad-y-acceso/ms-loginclientes-util/v1.3/oauth/token
+  BCI_LOGIN_BASIC_AUTH: YXBwLW1vdmlsLXBlcnNvbmFzOnNlY3JldGlzaW1v
+  BCI_API_HOST: bci-api-crt004
+  BCI_API_PORT: "443"
+  BCI_API_PROTOCOL: https
+  BCI_API_TIMEOUT_MS: "3000"
+  BCI_CIRCUIT_BREAKER_ENABLED: "false"
+  BCI_RETRY_ENABLED: "false"
+injection:
+  type: atOnceUsers
+  users: 3
+  duration: 30s
+sla:
+  maxResponseTime: 3000
+  failedRequests: 0
+assertions:
+  - type: status
+    expected: 200
+  - type: responseTimePercentile
+    percentile: 95
+    maxMs: 3000

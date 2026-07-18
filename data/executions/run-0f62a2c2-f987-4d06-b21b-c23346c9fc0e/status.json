@@ -1,0 +1,10 @@
+{
+  "executionId" : "run-0f62a2c2-f987-4d06-b21b-c23346c9fc0e",
+  "configurationId" : "cfg-aa4158c9-e93f-4473-8915-8bef33192628",
+  "status" : "PLATFORM_ERROR",
+  "exitCode" : 1,
+  "failureType" : null,
+  "message" : "Prueba finalizada con errores",
+  "startedAt" : "2026-07-16T16:47:58.110597480Z",
+  "finishedAt" : "2026-07-16T16:47:59.300192215Z"
+}

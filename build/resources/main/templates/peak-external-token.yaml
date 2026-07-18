@@ -1,0 +1,62 @@
+name: bcims-informacion-basica-peak
+profile: PEAK
+
+authentication:
+  mode: EXTERNAL_TOKEN
+  tokenEnvironmentVariable: BCI_API_TOKEN
+  tokenPrefix: bearer
+target:
+  baseUrl: ${BCI_API_BASE_URL}
+  applicationId: ${BCI_API_APPLICATION_ID}
+  channel: ${BCI_API_CHANNEL}
+  referenceService: ${BCI_API_REFERENCE_SERVICE}
+  referenceOperation: ${BCI_API_REFERENCE_OPERATION}
+  originAddr: ${BCI_API_ORIGIN_ADDR}
+
+scenarios:
+  tarjetas:
+    users: 75
+    rampSeconds: 90
+  saldos:
+    users: 150
+    rampSeconds: 90
+  deuda:
+    users: 90
+    rampSeconds: 90
+
+maxDurationSeconds: 840
+
+throttle:
+  - action: reach
+    rps: 150
+    seconds: 90
+  - action: hold
+    seconds: 180
+  - action: reach
+    rps: 278
+    seconds: 30
+  - action: hold
+    seconds: 60
+  - action: reach
+    rps: 214
+    seconds: 30
+  - action: hold
+    seconds: 180
+  - action: reach
+    rps: 322
+    seconds: 20
+  - action: hold
+    seconds: 40
+  - action: reach
+    rps: 214
+    seconds: 20
+  - action: hold
+    seconds: 120
+  - action: reach
+    rps: 3
+    seconds: 40
+
+assertions:
+  maxFailedPercentage: 1.0
+  percentile: 95
+  maxResponseTimeMilliseconds: 3000
