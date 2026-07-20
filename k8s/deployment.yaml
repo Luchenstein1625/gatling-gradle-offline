@@ -1,0 +1,155 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-vault-checker-deployment
+  namespace: bci-api
+  # CHANGESET-DEPLOY-2026-07-20:
+  # Subir este archivo para reflejar probes en /health y env de management base-path.
+  labels:
+    app: ms-vault-checker
+    tier: backend
+    tierApp: ms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-vault-checker
+  template:
+    metadata:
+      labels:
+        app: ms-vault-checker
+    spec:
+      securityContext:
+        fsGroup: 1001
+      containers:
+      - name: vault-checker-node
+        image: bcirg3crtrgandes01acr001.azurecr.io/gatling/gatling-gen3-docker-fast-api:0.0.1
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "qa"
+        - name: API_PREFIX
+          value: "/gatling/gatling-gen3-app/v0.1"
+        - name: SPRING_CLOUD_CONFIG_ENABLED
+          value: "false"
+        - name: SPRING_CLOUD_VAULT_ENABLED
+          value: "true"
+        - name: SPRING_CLOUD_VAULT_SCHEME
+          value: "https"
+        - name: SPRING_CLOUD_VAULT_HOST
+          value: "vault-server-service.bci-infra"
+        - name: SPRING_CLOUD_VAULT_PORT
+          value: "8200"
+        - name: SPRING_CLOUD_VAULT_AUTHENTICATION
+          value: "APPROLE"
+        - name: SPRING_CLOUD_VAULT_APP_ROLE_ROLE_ID
+          valueFrom:
+            secretKeyRef:
+              name: vault-role-secret-id
+              key: VAULT_ROLE_ID
+        - name: SPRING_CLOUD_VAULT_APP_ROLE_SECRET_ID
+          valueFrom:
+            secretKeyRef:
+              name: vault-role-secret-id
+              key: VAULT_SECRET_ID
+        - name: SPRING_CLOUD_VAULT_KV_ENABLED
+          value: "true"
+        - name: SPRING_CLOUD_VAULT_KV_BACKEND
+          value: "secret"
+        - name: SPRING_CLOUD_VAULT_KV_APPLICATION_NAME
+          value: "token_pruebas"
+        - name: SPRING_CLOUD_VAULT_KV_PROFILES
+          value: "qa"
+        - name: SPRING_CLOUD_VAULT_SSL_TRUST_STORE
+          value: "file:/vol-ms/pubcerts.ts"
+        - name: SPRING_CLOUD_VAULT_SSL_TRUST_STORE_PASSWORD
+          value: "changeit"
+        - name: SPRING_CLOUD_VAULT_FAIL_FAST
+          value: "false"
+        - name: MANAGEMENT_ENDPOINTS_WEB_BASE_PATH
+          value: "/"
+        - name: VAULT_ENABLED
+          value: "true"
+        - name: VAULT_FAIL_FAST
+          value: "false"
+        - name: VAULT_SCHEME
+          value: "https"
+        - name: VAULT_HOST
+          value: "vault-server-service.bci-infra"
+        - name: VAULT_PORT
+          value: "8200"
+        - name: VAULT_AUTHENTICATION
+          value: "APPROLE"
+        - name: VAULT_ROLE_ID
+          valueFrom:
+            secretKeyRef:
+              name: vault-role-secret-id
+              key: VAULT_ROLE_ID
+        - name: VAULT_SECRET_ID
+          valueFrom:
+            secretKeyRef:
+              name: vault-role-secret-id
+              key: VAULT_SECRET_ID
+        - name: VAULT_KV_APPLICATION_NAME
+          value: "token_pruebas"
+        - name: VAULT_KV_PROFILES
+          value: "qa"
+        - name: VAULT_TRUST_STORE
+          value: "file:/vol-ms/pubcerts.ts"
+        - name: VAULT_TRUST_STORE_PWD
+          value: "changeit"
+        - name: JAVA_TOOL_OPTIONS
+          value: "-XX:+UseG1GC -Xms32m -Xmx160m -XX:MaxMetaspaceSize=128m"
+        livenessProbe:
+          httpGet:
+            path: /gatling/gatling-gen3-app/v0.1/health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /gatling/gatling-gen3-app/v0.1/health
+            port: 8080
+            scheme: HTTP
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 60
+        resources:
+          requests:
+            cpu: 100m
+            memory: 384Mi
+          limits:
+            cpu: "1"
+            memory: 768Mi
+        securityContext:
+          runAsNonRoot: true
+          runAsGroup: 1001
+          runAsUser: 1001
+          seccompProfile:
+            type: RuntimeDefault
+        volumeMounts:
+        - mountPath: /vol-ms
+          name: ms-secret-vol
+          readOnly: true
+      volumes:
+      - name: ms-secret-vol
+        secret:
+          secretName: ms-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gatling-gen3-svc
+  namespace: bci-api
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: ms-vault-checker
+  type: ClusterIP

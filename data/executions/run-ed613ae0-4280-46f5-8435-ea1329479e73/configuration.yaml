@@ -1,9 +1,0 @@
-name: Custom Simulation Runtime Upload
-simulationClass: bci.cards.simulation.SimpleTest
-mode: SMOKE
-injection:
-  atOnceUsers: 1
-  duration: 30 seconds
-sla:
-  maxResponseTime: 3000
-  failedRequests: 0

@@ -1,2 +1,0 @@
-GET http://localhost:8080/api/executions/REEMPLAZAR_EXECUTION_ID/logs
-Accept: text/plain

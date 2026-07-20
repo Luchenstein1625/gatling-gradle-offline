@@ -1,0 +1,96 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.5.15'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+}
+
+// CHANGESET-BUILD-GRADLE-2026-07-20:
+// Subir este archivo para generar app-version.properties con version/timestamp de build.
+
+group = 'cl.bci'
+version = '0.0.1-SNAPSHOT'
+
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    set('springCloudVersion', "2020.0.6")
+}
+
+dependencies {
+    // Web & Actuator
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // CVE remediation overrides (Spring Boot 2.5.x / Java 11 compatible range)
+    implementation 'org.apache.tomcat.embed:tomcat-embed-core:9.0.118'
+    implementation 'org.apache.tomcat.embed:tomcat-embed-el:9.0.118'
+    implementation 'org.apache.tomcat.embed:tomcat-embed-websocket:9.0.118'
+    implementation 'org.springframework:spring-web:5.3.39'
+    implementation 'org.springframework:spring-webmvc:5.3.39'
+    implementation 'org.springframework:spring-expression:5.3.39'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.18.9'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.18.6'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.9'
+    implementation 'org.yaml:snakeyaml:2.0'
+    implementation 'ch.qos.logback:logback-classic:1.2.13'
+    implementation 'ch.qos.logback:logback-core:1.2.13'
+
+    // Spring Cloud & Vault Integration
+    implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+    implementation 'org.springframework.cloud:spring-cloud-starter-vault-config'
+    implementation 'org.springframework.vault:spring-vault-core:2.3.4'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+bootJar {
+    archiveFileName = 'app.jar'
+    mainClass = 'cl.bci.vaultchecker.VaultCheckerApplication'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+}
+
+def generatedVersionDir = file("$buildDir/generated-resources")
+def generatedVersionFile = file("$generatedVersionDir/app-version.properties")
+
+tasks.register('generateAppVersionProperties') {
+    outputs.file generatedVersionFile
+    doLast {
+        generatedVersionDir.mkdirs()
+        def buildTimestamp = new Date().format('yyyy-MM-dd HH:mm:ss Z')
+        generatedVersionFile.text = """app.build.version=${project.version}
+app.build.timestamp=${buildTimestamp}
+app.build.display=${project.version} @ ${buildTimestamp}
+"""
+    }
+}
+
+processResources.dependsOn tasks.named('generateAppVersionProperties')
+sourceSets.main.resources.srcDir(generatedVersionDir)

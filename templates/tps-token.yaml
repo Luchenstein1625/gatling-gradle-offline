@@ -1,7 +1,0 @@
-name: TPS External Token
-simulationClass: bci.cards.simulation.BcimsInformacionBasicaTpsSimulation
-mode: external-token
-
-environment:
-  BCI_API_BASE_URL: https://api.example.cl
-  ACCESS_TOKEN: PEGAR_TOKEN_AQUI

@@ -1,9 +1,10 @@
 services:
   gatling-api:
+    # CHANGESET-COMPOSE-2026-07-20:
+    # Subir este archivo para usar healthcheck en /health.
     build:
       context: .
       dockerfile: Dockerfile
-    image: gatling-control-api:secure-cve-patched
     container_name: gatling-control-api
     ports:
       - "8080:8080"
@@ -11,10 +12,33 @@ services:
       APP_DATA_ROOT: /app/data
       RESULTS_DIR: /app/data/executions
       API_PREFIX: /gatling/gatling-gen3-app/v0.1
-      # JVM tuning sobreescribible por ambiente
       JAVA_TOOL_OPTIONS: "-XX:+UseG1GC -Xms32m -Xmx160m -XX:MaxMetaspaceSize=128m"
-
-      # Secretos y configuración BCI.
+      # Permite levantar en local sin Vault, pero habilitable por variable al probar conectividad real.
+      SPRING_CLOUD_VAULT_ENABLED: "${SPRING_CLOUD_VAULT_ENABLED:-false}"
+      SPRING_CLOUD_CONFIG_ENABLED: "${SPRING_CLOUD_CONFIG_ENABLED:-false}"
+      SPRING_CLOUD_VAULT_SCHEME: "${VAULT_SCHEME:-https}"
+      SPRING_CLOUD_VAULT_HOST: "${VAULT_HOST:-vault-server-service.bci-infra}"
+      SPRING_CLOUD_VAULT_PORT: "${VAULT_PORT:-8200}"
+      SPRING_CLOUD_VAULT_AUTHENTICATION: "${VAULT_AUTHENTICATION:-APPROLE}"
+      SPRING_CLOUD_VAULT_APP_ROLE_ROLE_ID: "${VAULT_ROLE_ID:-local-role-id}"
+      SPRING_CLOUD_VAULT_APP_ROLE_SECRET_ID: "${VAULT_SECRET_ID:-local-secret-id}"
+      SPRING_CLOUD_VAULT_FAIL_FAST: "${VAULT_FAIL_FAST:-false}"
+      SPRING_CLOUD_VAULT_SSL_TRUST_STORE: "${VAULT_TRUST_STORE:-}"
+      SPRING_CLOUD_VAULT_SSL_TRUST_STORE_PASSWORD: "${VAULT_TRUST_STORE_PWD:-}"
+      # ===== VAULT INJECTION OVERRIDES =====
+      VAULT_ENABLED: "${VAULT_ENABLED:-true}"
+      VAULT_FAIL_FAST: "${VAULT_FAIL_FAST:-false}"
+      VAULT_SCHEME: "${VAULT_SCHEME:-https}"
+      VAULT_HOST: "${VAULT_HOST:-vault-server-service.bci-infra}"
+      VAULT_PORT: "${VAULT_PORT:-8200}"
+      VAULT_AUTHENTICATION: "${VAULT_AUTHENTICATION:-APPROLE}"
+      VAULT_ROLE_ID: "${VAULT_ROLE_ID:-local-role-id}"
+      VAULT_SECRET_ID: "${VAULT_SECRET_ID:-local-secret-id}"
+      VAULT_TOKEN: "${VAULT_TOKEN:-}"
+      VAULT_TRUST_STORE: "${VAULT_TRUST_STORE:-}"
+      VAULT_TRUST_STORE_PWD: "${VAULT_TRUST_STORE_PWD:-}"
+      
+      # BCI Config Pass-throughs
       BCI_LOGIN_URL: ${BCI_LOGIN_URL:-}
       BCI_LOGIN_BASIC_AUTH: ${BCI_LOGIN_BASIC_AUTH:-}
       BCI_LOGIN_APPLICATION_ID: ${BCI_LOGIN_APPLICATION_ID:-Pruebas de Rendimiento Andes Cert}
@@ -25,7 +49,6 @@ services:
       BCI_LOGIN_COOKIE: ${BCI_LOGIN_COOKIE:-}
       BCI_LOGIN_X_IBM_CLIENT_ID: ${BCI_LOGIN_X_IBM_CLIENT_ID:-}
       BCI_LOGIN_CLIENT_ID: ${BCI_LOGIN_CLIENT_ID:-}
-
       BCI_API_BASE_URL: ${BCI_API_BASE_URL:-}
       BCI_API_APPLICATION_ID: ${BCI_API_APPLICATION_ID:-postman}
       BCI_API_CHANNEL: ${BCI_API_CHANNEL:-910}
@@ -33,20 +56,18 @@ services:
       BCI_API_REFERENCE_OPERATION: ${BCI_API_REFERENCE_OPERATION:-postman}
       BCI_API_ORIGIN_ADDR: ${BCI_API_ORIGIN_ADDR:-127.0.0.1}
       BCI_API_TOKEN: ${BCI_API_TOKEN:-}
-
     volumes:
       - ./data:/app/data
-    networks:
-      - gatling-network
-    # Permite acceder a servicios corriendo en el host (e.g. APIs target)
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8080/gatling/gatling-gen3-app/v0.1/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/gatling/gatling-gen3-app/v0.1/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 20s
+      start_period: 25s
+    networks:
+      - gatling-network
 
 networks:
   gatling-network:

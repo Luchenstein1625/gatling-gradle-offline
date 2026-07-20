@@ -1,0 +1,46 @@
+server:
+  port: 8080
+  servlet:
+    context-path: ${API_PREFIX:/gatling/gatling-gen3-app/v0.1}
+
+# CHANGESET-APP-CONFIG-2026-07-20:
+# Subir este archivo para exponer management health en /health (sin /actuator).
+
+spring:
+  application:
+    name: gatling-gen3-app
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  config:
+    import: "optional:vault://"
+
+  cloud:
+    vault:
+      enabled: ${VAULT_ENABLED:true}
+      scheme: ${VAULT_SCHEME:https}
+      host: ${VAULT_HOST:vault-server-service.bci-infra}
+      port: ${VAULT_PORT:8200}
+      authentication: ${VAULT_AUTHENTICATION:APPROLE}
+      app-role:
+        role-id: ${VAULT_ROLE_ID}
+        secret-id: ${VAULT_SECRET_ID}
+      kv:
+        enabled: true
+        backend: secret
+      ssl:
+        trust-store: ${VAULT_TRUST_STORE:}
+        trust-store-password: ${VAULT_TRUST_STORE_PWD:}
+      fail-fast: ${VAULT_FAIL_FAST:true}
+      application-name: token_pruebas
+      profiles: ${VAULT_KV_PROFILES:qa}      
+
+# Endpoint de health check expuesto en /health
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: "health,info"
+  endpoint:
+    health:
+      show-details: always
