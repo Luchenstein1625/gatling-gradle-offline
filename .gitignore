@@ -1,24 +1,33 @@
-# Gradle y artefactos compilados
+# Compilados y temporales
 .gradle/
 **/.gradle/
-build/
 **/build/
-bin/
 **/bin/
 *.class
 *.jar
+*.war
+*.log
+*.tmp
+*.bak
 
-# Archivos del sistema operativo
-.DS_Store
-**/.DS_Store
-__MACOSX/
+# Herramientas y datos de análisis: nunca se suben al repositorio.
+security-runner/
+dependency-check-data/
+**/dependency-check-data/
+trivy-cache/
+**/trivy-cache/
+.trivycache/
 
-# Datos generados en ejecución y análisis de seguridad
-data/executions/
-data/security/database/
-data/security/trivy-cache/
-data/security/reports/
+# Reportes históricos o auxiliares. Solo se versiona el último reporte local.
+security-reports/*
+!security-reports/latest-vulnerability-report.txt
+trivy-*.json
+trivy-*.txt
+trivy-*.sarif
+dependency-check-report.*
 
-# Bases de datos locales
-*.mv.db
-*.trace.db
+# El caché funcional offline de Gradle/Gatling sigue siendo parte del proyecto.
+!offline-deps/
+!offline-deps/**
+
+data/security/database/odc.mv.db

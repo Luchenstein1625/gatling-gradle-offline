@@ -12,8 +12,8 @@ apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
-// CHANGESET-BUILD-GRADLE-2026-07-20:
-// Subir este archivo para generar app-version.properties con version/timestamp de build.
+// CHANGESET-BUILD-GRADLE-2026-07-21:
+// Consolida versionado de build y correcciones de dependencias de seguridad.
 
 group = 'cl.bci'
 version = '0.0.1-SNAPSHOT'
@@ -29,11 +29,12 @@ ext {
     // Línea corporativa validada para la integración Vault. No cambiar de forma
     // independiente: Boot, Cloud y Vault deben actualizarse como una matriz compatible.
     set('springCloudVersion', "2025.0.3")
+
     // Correcciones puntuales de seguridad. No modifican el BOM de Spring Cloud
     // ni la versión de Vault administrada por ese BOM.
     set('tomcatVersion', "10.1.57")
-    set('jacksonDatabindVersion', "2.21.5")
     set('httpCore5Version', "5.4.3")
+    set('bouncyCastleVersion', "1.84")
 }
 
 configurations.configureEach {
@@ -41,9 +42,14 @@ configurations.configureEach {
         force "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
         force "org.apache.tomcat.embed:tomcat-embed-el:${tomcatVersion}"
         force "org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}"
-        force "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}"
         force "org.apache.httpcomponents.core5:httpcore5:${httpCore5Version}"
         force "org.apache.httpcomponents.core5:httpcore5-h2:${httpCore5Version}"
+
+        // Vault y sus dependencias pueden incorporar Bouncy Castle de forma transitiva.
+        // Se fuerza toda la familia a la misma versión para evitar una mezcla incompatible.
+        force "org.bouncycastle:bcprov-jdk18on:${bouncyCastleVersion}"
+        force "org.bouncycastle:bcpkix-jdk18on:${bouncyCastleVersion}"
+        force "org.bouncycastle:bcutil-jdk18on:${bouncyCastleVersion}"
     }
 }
 
@@ -75,15 +81,16 @@ dependencyManagement {
     }
 
     // Sobrescrituras puntuales posteriores a los BOM de Spring. Declararlas aquí
-    // evita que el BOM de Spring Boot vuelva a seleccionar las versiones
-    // vulnerables durante la resolución del runtimeClasspath.
+    // evita que los BOM vuelvan a seleccionar versiones vulnerables.
     dependencies {
         dependency "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
         dependency "org.apache.tomcat.embed:tomcat-embed-el:${tomcatVersion}"
         dependency "org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}"
-        dependency "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}"
         dependency "org.apache.httpcomponents.core5:httpcore5:${httpCore5Version}"
         dependency "org.apache.httpcomponents.core5:httpcore5-h2:${httpCore5Version}"
+        dependency "org.bouncycastle:bcprov-jdk18on:${bouncyCastleVersion}"
+        dependency "org.bouncycastle:bcpkix-jdk18on:${bouncyCastleVersion}"
+        dependency "org.bouncycastle:bcutil-jdk18on:${bouncyCastleVersion}"
     }
 }
 
@@ -100,12 +107,12 @@ tasks.register('verifySecurityDependencyVersions') {
     doLast {
         def expected = [
                 'org.apache.tomcat.embed:tomcat-embed-core': tomcatVersion,
-                'com.fasterxml.jackson.core:jackson-databind': jacksonDatabindVersion,
                 'org.apache.httpcomponents.core5:httpcore5': httpCore5Version,
                 'org.springframework.cloud:spring-cloud-starter-vault-config': null
         ]
         def resolved = configurations.runtimeClasspath.resolvedConfiguration.resolvedArtifacts
-        expected.each { coordinate, version ->
+
+        expected.each { coordinate, expectedVersion ->
             def parts = coordinate.split(':')
             def artifact = resolved.find {
                 it.moduleVersion.id.group == parts[0] && it.name == parts[1]
@@ -113,10 +120,23 @@ tasks.register('verifySecurityDependencyVersions') {
             if (artifact == null) {
                 throw new GradleException("No se resolvió la dependencia requerida: ${coordinate}")
             }
-            if (version != null && artifact.moduleVersion.id.version != version) {
-                throw new GradleException("${coordinate} resolvió ${artifact.moduleVersion.id.version}; se esperaba ${version}")
+            if (expectedVersion != null && artifact.moduleVersion.id.version != expectedVersion) {
+                throw new GradleException("${coordinate} resolvió ${artifact.moduleVersion.id.version}; se esperaba ${expectedVersion}")
             }
             logger.lifecycle("VERIFIED ${coordinate}:${artifact.moduleVersion.id.version}")
+        }
+
+        def bouncyCastleArtifacts = resolved.findAll {
+            it.moduleVersion.id.group == 'org.bouncycastle'
+        }
+        if (bouncyCastleArtifacts.isEmpty()) {
+            throw new GradleException('No se resolvió Bouncy Castle en runtimeClasspath; no es posible validar su corrección')
+        }
+        bouncyCastleArtifacts.each { artifact ->
+            if (artifact.moduleVersion.id.version != bouncyCastleVersion) {
+                throw new GradleException("org.bouncycastle:${artifact.name} resolvió ${artifact.moduleVersion.id.version}; se esperaba ${bouncyCastleVersion}")
+            }
+            logger.lifecycle("VERIFIED org.bouncycastle:${artifact.name}:${artifact.moduleVersion.id.version}")
         }
     }
 }
