@@ -1,0 +1,319 @@
+[CONTROL] Iniciando bci.cards.simulation.PublicJsonPlaceholderPostSmokeSimulation
+Picked up JAVA_TOOL_OPTIONS: -XX:+UseG1GC -Xms32m -Xmx160m -XX:MaxMetaspaceSize=128m
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.6/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :compileGatlingJava NO-SOURCE
+
+> Task :compileGatlingScala
+Picked up JAVA_TOOL_OPTIONS: -XX:+UseG1GC -Xms32m -Xmx160m -XX:MaxMetaspaceSize=128m
+
+> Task :processGatlingResources NO-SOURCE
+> Task :gatlingClasses
+
+> Task :gatlingRun
+Picked up JAVA_TOOL_OPTIONS: -XX:+UseG1GC -Xms32m -Xmx160m -XX:MaxMetaspaceSize=128m
+00:39:32.991 [main] INFO io.gatling.core.config.GatlingConfiguration$ -- Gatling will try to load 'gatling.conf' config file as ClassLoader resource.
+00:39:33.071 [main] DEBUG io.netty.util.internal.logging.InternalLoggerFactory -- Using SLF4J as the default logging framework
+00:39:33.074 [main] DEBUG io.netty.util.internal.PlatformDependent0 -- Java version: 17
+00:39:33.074 [main] DEBUG io.netty.util.internal.PlatformDependent0 -- -Dio.netty.noUnsafe: false
+00:39:33.074 [main] DEBUG io.netty.util.internal.PlatformDependent0 -- Thread.isVirtual() is not available: 
+00:39:33.076 [main] DEBUG io.netty.util.internal.PlatformDependent0 -- sun.misc.Unsafe.theUnsafe: available
+00:39:33.076 [main] DEBUG io.netty.util.internal.PlatformDependent0 -- sun.misc.Unsafe base methods: all available
+00:39:33.077 [main] DEBUG io.netty.util.internal.PlatformDependent0 -- java.nio.Buffer.address: available
+00:39:33.077 [main] DEBUG io.netty.util.internal.PlatformDependent0 -- direct buffer constructor: unavailable: Reflective setAccessible(true) disabled
+00:39:33.078 [main] DEBUG io.netty.util.internal.PlatformDependent0 -- java.nio.Bits.unaligned: available, true
+00:39:33.079 [main] DEBUG io.netty.util.internal.PlatformDependent0 -- jdk.internal.misc.Unsafe.allocateUninitializedArray(int): available
+00:39:33.081 [main] DEBUG io.netty.util.internal.PlatformDependent0 -- java.nio.DirectByteBuffer.<init>(long, {int,long}): unavailable
+00:39:33.081 [main] DEBUG io.netty.util.internal.PlatformDependent -- sun.misc.Unsafe: available
+00:39:33.081 [main] DEBUG io.netty.util.internal.PlatformDependent -- -Dio.netty.tmpdir: /tmp (java.io.tmpdir)
+00:39:33.081 [main] DEBUG io.netty.util.internal.PlatformDependent -- -Dio.netty.bitMode: 64 (sun.arch.data.model)
+00:39:33.081 [main] DEBUG io.netty.util.internal.PlatformDependent -- -Dio.netty.maxDirectMemory: 1073741824 bytes
+00:39:33.082 [main] DEBUG io.netty.util.internal.CleanerJava9 -- java.nio.ByteBuffer.cleaner(): available
+00:39:33.083 [main] DEBUG io.netty.util.internal.PlatformDependent -- -Dio.netty.noPreferDirect: false
+00:39:33.083 [main] DEBUG io.netty.util.internal.PlatformDependent -- -Dio.netty.ignoreExpensiveClean: false
+00:39:33.089 [main] DEBUG io.netty.util.internal.PlatformDependent -- -Dio.netty.jfr.enabled: true
+00:39:33.092 [main] DEBUG io.netty.util.internal.NativeLibraryLoader -- -Dio.netty.native.workdir: /tmp (io.netty.tmpdir)
+00:39:33.092 [main] DEBUG io.netty.util.internal.NativeLibraryLoader -- -Dio.netty.native.deleteLibAfterLoading: true
+00:39:33.092 [main] DEBUG io.netty.util.internal.NativeLibraryLoader -- -Dio.netty.native.tryPatchShadedId: true
+00:39:33.092 [main] DEBUG io.netty.util.internal.NativeLibraryLoader -- -Dio.netty.native.detectNativeLibraryDuplicates: true
+00:39:33.124 [main] DEBUG io.netty.util.internal.NativeLibraryLoader -- Successfully loaded the library /tmp/libnetty_tcnative_linux_x86_647713238801320130417.so
+00:39:33.124 [main] DEBUG io.netty.util.internal.NativeLibraryLoader -- Loaded library with name 'netty_tcnative_linux_x86_64'
+00:39:33.124 [main] DEBUG io.netty.handler.ssl.OpenSsl -- Initialize netty-tcnative using engine: 'default'
+00:39:33.124 [main] DEBUG io.netty.handler.ssl.OpenSsl -- netty-tcnative using native library: BoringSSL
+00:39:33.208 [main] DEBUG io.netty.util.ResourceLeakDetector -- -Dio.netty.leakDetection.level: simple
+00:39:33.208 [main] DEBUG io.netty.util.ResourceLeakDetector -- -Dio.netty.leakDetection.targetRecords: 4
+00:39:33.213 [main] DEBUG io.netty.buffer.AbstractByteBuf -- -Dio.netty.buffer.checkAccessible: true
+00:39:33.213 [main] DEBUG io.netty.buffer.AbstractByteBuf -- -Dio.netty.buffer.checkBounds: true
+00:39:33.213 [main] DEBUG io.netty.util.ResourceLeakDetectorFactory -- Loaded default ResourceLeakDetector: io.netty.util.ResourceLeakDetector@31ea9581
+00:39:33.227 [main] DEBUG io.netty.util.internal.InternalThreadLocalMap -- -Dio.netty.threadLocalMap.stringBuilder.initialSize: 1024
+00:39:33.228 [main] DEBUG io.netty.util.internal.InternalThreadLocalMap -- -Dio.netty.threadLocalMap.stringBuilder.maxSize: 4096
+00:39:33.229 [main] DEBUG io.netty.buffer.PooledByteBufAllocator -- -Dio.netty.allocator.numHeapArenas: 24
+00:39:33.229 [main] DEBUG io.netty.buffer.PooledByteBufAllocator -- -Dio.netty.allocator.numDirectArenas: 24
+00:39:33.229 [main] DEBUG io.netty.buffer.PooledByteBufAllocator -- -Dio.netty.allocator.pageSize: 8192
+00:39:33.229 [main] DEBUG io.netty.buffer.PooledByteBufAllocator -- -Dio.netty.allocator.maxOrder: 9
+00:39:33.229 [main] DEBUG io.netty.buffer.PooledByteBufAllocator -- -Dio.netty.allocator.chunkSize: 4194304
+00:39:33.229 [main] DEBUG io.netty.buffer.PooledByteBufAllocator -- -Dio.netty.allocator.smallCacheSize: 256
+00:39:33.229 [main] DEBUG io.netty.buffer.PooledByteBufAllocator -- -Dio.netty.allocator.normalCacheSize: 64
+00:39:33.229 [main] DEBUG io.netty.buffer.PooledByteBufAllocator -- -Dio.netty.allocator.maxCachedBufferCapacity: 32768
+00:39:33.229 [main] DEBUG io.netty.buffer.PooledByteBufAllocator -- -Dio.netty.allocator.cacheTrimInterval: 8192
+00:39:33.230 [main] DEBUG io.netty.buffer.PooledByteBufAllocator -- -Dio.netty.allocator.cacheTrimIntervalMillis: 0
+00:39:33.230 [main] DEBUG io.netty.buffer.PooledByteBufAllocator -- -Dio.netty.allocator.useCacheForAllThreads: false
+00:39:33.230 [main] DEBUG io.netty.buffer.PooledByteBufAllocator -- -Dio.netty.allocator.maxCachedByteBuffersPerChunk: 1023
+00:39:33.230 [main] DEBUG io.netty.buffer.PooledByteBufAllocator -- -Dio.netty.allocator.disableCacheFinalizersForFastThreadLocalThreads: false
+00:39:33.235 [main] DEBUG io.netty.buffer.ByteBufUtil -- -Dio.netty.allocator.type: pooled
+00:39:33.236 [main] DEBUG io.netty.buffer.ByteBufUtil -- -Dio.netty.threadLocalDirectBufferSize: 0
+00:39:33.236 [main] DEBUG io.netty.buffer.ByteBufUtil -- -Dio.netty.maxThreadLocalCharBufferSize: 200000
+00:39:33.238 [main] DEBUG io.netty.util.ResourceLeakDetectorFactory -- Loaded default ResourceLeakDetector: io.netty.util.ResourceLeakDetector@14bdbc74
+00:39:33.242 [main] DEBUG io.netty.util.Recycler -- -Dio.netty.recycler.maxCapacityPerThread: 4096
+00:39:33.242 [main] DEBUG io.netty.util.Recycler -- -Dio.netty.recycler.ratio: 8
+00:39:33.242 [main] DEBUG io.netty.util.Recycler -- -Dio.netty.recycler.chunkSize: 32
+00:39:33.242 [main] DEBUG io.netty.util.Recycler -- -Dio.netty.recycler.blocking: false
+00:39:33.242 [main] DEBUG io.netty.util.Recycler -- -Dio.netty.recycler.batchFastThreadLocalOnly: true
+00:39:33.312 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 => ECDHE-ECDSA-AES128-GCM-SHA256
+00:39:33.313 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 => ECDHE-ECDSA-AES128-GCM-SHA256
+00:39:33.313 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 => ECDHE-RSA-AES128-GCM-SHA256
+00:39:33.313 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_ECDHE_RSA_WITH_AES_128_GCM_SHA256 => ECDHE-RSA-AES128-GCM-SHA256
+00:39:33.313 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 => ECDHE-ECDSA-AES256-GCM-SHA384
+00:39:33.313 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 => ECDHE-ECDSA-AES256-GCM-SHA384
+00:39:33.313 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 => ECDHE-RSA-AES256-GCM-SHA384
+00:39:33.313 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_ECDHE_RSA_WITH_AES_256_GCM_SHA384 => ECDHE-RSA-AES256-GCM-SHA384
+00:39:33.313 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 => ECDHE-ECDSA-CHACHA20-POLY1305
+00:39:33.313 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 => ECDHE-ECDSA-CHACHA20-POLY1305
+00:39:33.313 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 => ECDHE-RSA-CHACHA20-POLY1305
+00:39:33.313 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 => ECDHE-RSA-CHACHA20-POLY1305
+00:39:33.314 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256 => ECDHE-PSK-CHACHA20-POLY1305
+00:39:33.314 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256 => ECDHE-PSK-CHACHA20-POLY1305
+00:39:33.314 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA => ECDHE-ECDSA-AES128-SHA
+00:39:33.314 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_ECDHE_ECDSA_WITH_AES_128_CBC_SHA => ECDHE-ECDSA-AES128-SHA
+00:39:33.314 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA => ECDHE-RSA-AES128-SHA
+00:39:33.314 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_ECDHE_RSA_WITH_AES_128_CBC_SHA => ECDHE-RSA-AES128-SHA
+00:39:33.314 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA => ECDHE-PSK-AES128-CBC-SHA
+00:39:33.314 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_ECDHE_PSK_WITH_AES_128_CBC_SHA => ECDHE-PSK-AES128-CBC-SHA
+00:39:33.314 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA => ECDHE-ECDSA-AES256-SHA
+00:39:33.315 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_ECDHE_ECDSA_WITH_AES_256_CBC_SHA => ECDHE-ECDSA-AES256-SHA
+00:39:33.315 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA => ECDHE-RSA-AES256-SHA
+00:39:33.315 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_ECDHE_RSA_WITH_AES_256_CBC_SHA => ECDHE-RSA-AES256-SHA
+00:39:33.315 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_ECDHE_PSK_WITH_AES_256_CBC_SHA => ECDHE-PSK-AES256-CBC-SHA
+00:39:33.315 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_ECDHE_PSK_WITH_AES_256_CBC_SHA => ECDHE-PSK-AES256-CBC-SHA
+00:39:33.315 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_RSA_WITH_AES_128_GCM_SHA256 => AES128-GCM-SHA256
+00:39:33.315 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_RSA_WITH_AES_128_GCM_SHA256 => AES128-GCM-SHA256
+00:39:33.315 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_RSA_WITH_AES_256_GCM_SHA384 => AES256-GCM-SHA384
+00:39:33.315 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_RSA_WITH_AES_256_GCM_SHA384 => AES256-GCM-SHA384
+00:39:33.315 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_RSA_WITH_AES_128_CBC_SHA => AES128-SHA
+00:39:33.315 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_RSA_WITH_AES_128_CBC_SHA => AES128-SHA
+00:39:33.316 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_PSK_WITH_AES_128_CBC_SHA => PSK-AES128-CBC-SHA
+00:39:33.316 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_PSK_WITH_AES_128_CBC_SHA => PSK-AES128-CBC-SHA
+00:39:33.316 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_RSA_WITH_AES_256_CBC_SHA => AES256-SHA
+00:39:33.316 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_RSA_WITH_AES_256_CBC_SHA => AES256-SHA
+00:39:33.316 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_PSK_WITH_AES_256_CBC_SHA => PSK-AES256-CBC-SHA
+00:39:33.316 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_PSK_WITH_AES_256_CBC_SHA => PSK-AES256-CBC-SHA
+00:39:33.316 [main] DEBUG io.netty.handler.ssl.OpenSsl -- Supported protocols (OpenSSL): [SSLv2Hello, TLSv1, TLSv1.1, TLSv1.2, TLSv1.3] 
+00:39:33.316 [main] DEBUG io.netty.handler.ssl.OpenSsl -- Default cipher suites (OpenSSL): [TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA, TLS_RSA_WITH_AES_128_GCM_SHA256, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_256_CBC_SHA, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_CHACHA20_POLY1305_SHA256]
+00:39:33.364 [main] DEBUG io.netty.util.internal.NativeLibraryLoader -- Successfully loaded the library /tmp/libnetty_transport_native_epoll_x86_646650741676056725416.so
+00:39:33.366 [main] DEBUG io.netty.util.NetUtil -- -Djava.net.preferIPv4Stack: false
+00:39:33.366 [main] DEBUG io.netty.util.NetUtil -- -Djava.net.preferIPv6Addresses: false
+00:39:33.367 [main] DEBUG io.netty.util.NetUtilInitializations -- Loopback interface: lo (lo, 0:0:0:0:0:0:0:1%lo)
+00:39:33.368 [main] DEBUG io.netty.util.NetUtil -- /proc/sys/net/core/somaxconn: 4096
+00:39:33.371 [main] DEBUG io.netty.channel.MultithreadEventLoopGroup -- -Dio.netty.eventLoopThreads: 24
+00:39:33.375 [main] DEBUG io.netty.util.concurrent.GlobalEventExecutor -- -Dio.netty.globalEventExecutor.quietPeriodSeconds: 1
+00:39:33.380 [main] DEBUG io.netty.util.internal.PlatformDependent -- org.jctools-core.MpscChunkedArrayQueue: available
+Jul 21, 2026 12:39:33 AM java.util.prefs.FileSystemPreferences$1 run
+INFO: Created user preferences directory.
+00:39:34.209 [main] DEBUG io.gatling.http.engine.HttpEngine -- Start warm up
+00:39:34.263 [gatling-1-1] DEBUG io.gatling.http.client.pool.ChannelPool -- No channel in the pool for key ChannelPoolKey{clientId=0, remoteKey=RemoteKey{targetHostBaseUrl='https://gatling.io', proxyHost='null', proxyPort=0}}
+00:39:34.291 [gatling-1-1] DEBUG io.gatling.http.client.impl.DefaultHttpClient -- Opening new channel to remote=[gatling.io/198.202.211.1:443] from local=null
+00:39:34.297 [gatling-1-1] DEBUG io.netty.channel.DefaultChannelId -- -Dio.netty.processId: 366 (auto-detected)
+00:39:34.298 [gatling-1-1] DEBUG io.netty.channel.DefaultChannelId -- -Dio.netty.machineId: 02:42:ac:ff:fe:17:00:02 (auto-detected)
+00:39:34.320 [gatling-1-1] DEBUG io.netty.bootstrap.ChannelInitializerExtensions -- -Dio.netty.bootstrap.extensions: null
+00:39:34.342 [gatling-1-1] DEBUG io.gatling.http.client.impl.DefaultHttpClient -- Connected to remoteAddress=gatling.io/198.202.211.1:443 from localAddress=/172.23.0.2:44342
+00:39:34.343 [gatling-1-1] DEBUG io.gatling.http.client.impl.DefaultHttpClient -- Installing SslHandler for gatling.io:443
+00:39:34.352 [gatling-1-1] DEBUG io.netty.util.ResourceLeakDetectorFactory -- Loaded default ResourceLeakDetector: io.netty.util.ResourceLeakDetector@26ae51a6
+00:39:34.387 [gatling-1-1] DEBUG io.netty.handler.ssl.util.InsecureTrustManagerFactory -- Accepting a server certificate: CN=gatling.io
+00:39:34.387 [gatling-1-1] DEBUG io.gatling.http.client.impl.DefaultHttpClient -- TLS handshake successful: peerHost=gatling.io peerPort=443 protocol=TLSv1.3 cipher suite=TLS_AES_128_GCM_SHA256
+00:39:34.390 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Write request WritableRequest{request=DefaultFullHttpRequest(decodeResult: success, version: HTTP/1.1, content: EmptyByteBufBE)
+GET / HTTP/1.1
+accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+accept-language: en-US,en;q=0.5
+accept-encoding: gzip
+connection: close
+user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/119.0
+host: gatling.io, content=null}
+00:39:34.396 [gatling-1-1] DEBUG io.netty.handler.ssl.SslHandler -- [id: 0x81357c8b, L:/172.23.0.2:44342 - R:gatling.io/198.202.211.1:443] HANDSHAKEN: protocol:TLSv1.3 cipher suite:TLS_AES_128_GCM_SHA256
+00:39:34.445 [gatling-1-1] DEBUG io.netty.util.ResourceLeakDetectorFactory -- Loaded default ResourceLeakDetector: io.netty.util.ResourceLeakDetector@169b0b99
+00:39:34.452 [gatling-1-1] DEBUG io.netty.handler.codec.compression.ZlibCodecFactory -- -Dio.netty.noJdkZlibDecoder: false
+00:39:34.452 [gatling-1-1] DEBUG io.netty.handler.codec.compression.ZlibCodecFactory -- -Dio.netty.noJdkZlibEncoder: false
+00:39:34.452 [gatling-1-1] DEBUG io.netty.handler.codec.compression.ZlibCodecFactory -- JZlib not in the classpath; the only window bits supported value will be 15
+00:39:34.455 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpResponse(decodeResult: success, version: HTTP/1.1)
+HTTP/1.1 200 OK
+Date: Tue, 21 Jul 2026 00:39:34 GMT
+Content-Type: text/html; charset=utf-8
+Transfer-Encoding: chunked
+Connection: close
+set-cookie: _cfuvid=zZi4xPY3FKqtVoDzdWbsKfw984ba9kNYvHZaHOhE_qg-1784594374.32861-1.0.1.1-y7zfrpvqEc.4PMOiu7eEHyu1UU6Njm6CQ6UdYDXi6LY; HttpOnly; SameSite=None; Secure; Path=/; Domain=gatling.io
+CF-Ray: a1e626378fb6b4e0-SCL
+CF-Cache-Status: HIT
+Age: 28360
+Last-Modified: Mon, 20 Jul 2026 19:58:11 GMT
+Link: <https://cdn.prod.website-files.com>; rel=preconnect; crossorigin, <https://cdn.prod.website-files.com/685a8fe4ddca049f26333871/css/gatling-preview.webflow.shared.c41c97f2d.min.css>; rel=preload; as=style; crossorigin; integrity="sha384-xByX8t1htdGii3tmnP5xk5sDBadRR3vk/u1aWBru0RxqtuKA4ytZHRkAh12JqLPz"
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000
+Vary: accept-encoding
+surrogate-control: max-age=432000
+surrogate-key: gatling.io 685a8fe4ddca049f26333871 pageId:685a8fe4ddca049f26333870 685bbddcda38f942f0e21505 6878c637117d8e2326e74ab7 68809670a5aa1db64a23658c 685bf722e9cfdeb7c4a6feab
+x-lambda-id: afe6b9e7-9a9c-4bcd-aed0-ea42692a2144
+x-wf-region: us-east-1
+alt-svc: h3=":443"; ma=86400
+content-encoding: gzip'
+00:39:34.456 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 70, cap: 320), decoderResult: success)'
+00:39:34.457 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 4401, cap: 8192), decoderResult: success)'
+00:39:34.458 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 3122, cap: 4096), decoderResult: success)'
+00:39:34.458 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 4543, cap: 8192), decoderResult: success)'
+00:39:34.459 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 7377, cap: 8192), decoderResult: success)'
+00:39:34.461 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 8213, cap: 16384), decoderResult: success)'
+00:39:34.461 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 7725, cap: 8192), decoderResult: success)'
+00:39:34.462 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 3325, cap: 4096), decoderResult: success)'
+00:39:34.463 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 4644, cap: 8192), decoderResult: success)'
+00:39:34.463 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 11143, cap: 16384), decoderResult: success)'
+00:39:34.463 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 6012, cap: 8192), decoderResult: success)'
+00:39:34.464 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 8686, cap: 16384), decoderResult: success)'
+00:39:34.465 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 24841, cap: 32768), decoderResult: success)'
+00:39:34.466 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 4576, cap: 8192), decoderResult: success)'
+00:39:34.469 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 12524, cap: 16384), decoderResult: success)'
+00:39:34.469 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 10154, cap: 16384), decoderResult: success)'
+00:39:34.470 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 5699, cap: 8192), decoderResult: success)'
+00:39:34.470 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 5004, cap: 8192), decoderResult: success)'
+00:39:34.470 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 5588, cap: 8192), decoderResult: success)'
+00:39:34.471 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 5891, cap: 8192), decoderResult: success)'
+00:39:34.471 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 10175, cap: 16384), decoderResult: success)'
+00:39:34.472 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 11045, cap: 16384), decoderResult: success)'
+00:39:34.472 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 6634, cap: 8192), decoderResult: success)'
+00:39:34.472 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 20470, cap: 32768), decoderResult: success)'
+00:39:34.473 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 22777, cap: 32768), decoderResult: success)'
+00:39:34.473 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 25161, cap: 32768), decoderResult: success)'
+00:39:34.474 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 16216, cap: 16384), decoderResult: success)'
+00:39:34.474 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 5027, cap: 8192), decoderResult: success)'
+00:39:34.474 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 20441, cap: 32768), decoderResult: success)'
+00:39:34.475 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 8607, cap: 16384), decoderResult: success)'
+00:39:34.476 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 11819, cap: 16384), decoderResult: success)'
+00:39:34.476 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 7015, cap: 8192), decoderResult: success)'
+00:39:34.476 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 3587, cap: 4096), decoderResult: success)'
+00:39:34.477 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 3198, cap: 4096), decoderResult: success)'
+00:39:34.477 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 10834, cap: 16384), decoderResult: success)'
+00:39:34.478 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 3377, cap: 4096), decoderResult: success)'
+00:39:34.478 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 4881, cap: 8192), decoderResult: success)'
+00:39:34.479 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 4543, cap: 8192), decoderResult: success)'
+00:39:34.479 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpContent(data: PooledUnsafeHeapByteBuf(ridx: 0, widx: 826, cap: 1024), decoderResult: success)'
+00:39:34.480 [gatling-1-1] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='EmptyLastHttpContent'
+00:39:34.484 [main] DEBUG io.gatling.http.engine.HttpEngine -- Warm up request https://gatling.io successful
+00:39:34.485 [main] DEBUG io.gatling.http.engine.HttpEngine -- Warm up done
+Simulation bci.cards.simulation.PublicJsonPlaceholderPostSmokeSimulation started...
+00:39:34.514 [pool-1-thread-1] DEBUG io.gatling.core.controller.Controller -- Setting up max duration
+00:39:34.515 [pool-1-thread-2] INFO io.gatling.core.stats.writer.ConsoleDataWriter -- Initializing
+00:39:34.515 [pool-1-thread-3] INFO io.gatling.core.stats.writer.LogFileDataWriter -- Initializing
+00:39:34.518 [pool-1-thread-2] INFO io.gatling.core.stats.writer.ConsoleDataWriter -- Initialized
+00:39:34.523 [pool-1-thread-4] INFO io.gatling.core.controller.inject.open.OpenWorkload -- Scenario Mock público - JSONPlaceholder POST has finished injecting
+00:39:34.523 [pool-1-thread-4] INFO io.gatling.core.controller.inject.Injector -- All scenarios have finished injecting
+00:39:34.524 [gatling-1-2] DEBUG io.gatling.core.controller.inject.open.OpenWorkload -- Start user #1
+00:39:34.532 [pool-1-thread-3] INFO io.gatling.core.stats.writer.LogFileDataWriter -- Initialized
+00:39:34.542 [gatling-1-2] DEBUG io.gatling.http.engine.tx.HttpTxExecutor -- Sending request=POST simulado uri=https://jsonplaceholder.typicode.com/posts: scenario=Mock público - JSONPlaceholder POST, userId=1
+00:39:34.545 [gatling-1-2] DEBUG io.gatling.http.client.pool.ChannelPool -- No channel in the pool for key ChannelPoolKey{clientId=1, remoteKey=RemoteKey{targetHostBaseUrl='https://jsonplaceholder.typicode.com', proxyHost='null', proxyPort=0}}
+00:39:34.547 [gatling-1-2] DEBUG io.gatling.http.client.impl.DefaultHttpClient -- Opening new channel to remote=[jsonplaceholder.typicode.com/172.67.167.151:443, jsonplaceholder.typicode.com/104.21.59.19:443, jsonplaceholder.typicode.com/[2606:4700:3037:0:0:0:ac43:a797]:443, jsonplaceholder.typicode.com/[2606:4700:3033:0:0:0:6815:3b13]:443] from local=null
+00:39:34.606 [gatling-1-2] DEBUG io.gatling.http.client.impl.DefaultHttpClient -- Connected to remoteAddress=jsonplaceholder.typicode.com/172.67.167.151:443 from localAddress=/172.23.0.2:39210
+00:39:34.606 [gatling-1-2] DEBUG io.gatling.http.client.impl.DefaultHttpClient -- Installing SslHandler for jsonplaceholder.typicode.com:443
+00:39:34.671 [gatling-1-2] DEBUG io.netty.handler.ssl.util.InsecureTrustManagerFactory -- Accepting a server certificate: CN=typicode.com
+00:39:34.672 [gatling-1-2] DEBUG io.gatling.http.client.impl.DefaultHttpClient -- TLS handshake successful: peerHost=jsonplaceholder.typicode.com peerPort=443 protocol=TLSv1.3 cipher suite=TLS_AES_128_GCM_SHA256
+00:39:34.672 [gatling-1-2] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Write request WritableRequest{request=DefaultFullHttpRequest(decodeResult: success, version: HTTP/1.1, content: UnpooledHeapByteBuf(ridx: 0, widx: 63, cap: 63/63))
+POST /posts HTTP/1.1
+content-type: application/json
+accept: application/json
+user-agent: gatling-control-center-smoke/1.0
+host: jsonplaceholder.typicode.com
+content-length: 63, content=null}
+00:39:34.672 [gatling-1-2] DEBUG io.netty.handler.ssl.SslHandler -- [id: 0x6f6d3cf5, L:/172.23.0.2:39210 - R:jsonplaceholder.typicode.com/172.67.167.151:443] HANDSHAKEN: protocol:TLSv1.3 cipher suite:TLS_AES_128_GCM_SHA256
+00:39:34.850 [gatling-1-2] DEBUG io.netty.handler.codec.compression.Zstd -- zstd-jni not in the classpath; Zstd support will be unavailable.
+00:39:34.851 [gatling-1-2] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultHttpResponse(decodeResult: success, version: HTTP/1.1)
+HTTP/1.1 201 Created
+Date: Tue, 21 Jul 2026 00:39:34 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 89
+Connection: keep-alive
+access-control-allow-credentials: true
+access-control-expose-headers: Location
+Cache-Control: no-cache
+etag: W/"59-b5Eajz4NhqQtU616PC57soFsOlY"
+expires: -1
+location: https://jsonplaceholder.typicode.com/posts/101
+nel: {"report_to":"heroku-nel","response_headers":["Via"],"max_age":3600,"success_fraction":0.01,"failure_fraction":0.1}
+pragma: no-cache
+report-to: {"group":"heroku-nel","endpoints":[{"url":"https://nel.heroku.com/reports?s=94VHBCF%2FvBLemTHVlkgkTY2%2BTV%2B4TlCc6pS%2FRZsjp68%3D\u0026sid=e11707d5-02a7-43ef-b45e-2cf4d2036f7d\u0026ts=1784594374"}],"max_age":3600}
+reporting-endpoints: heroku-nel="https://nel.heroku.com/reports?s=94VHBCF%2FvBLemTHVlkgkTY2%2BTV%2B4TlCc6pS%2FRZsjp68%3D&sid=e11707d5-02a7-43ef-b45e-2cf4d2036f7d&ts=1784594374"
+Server: cloudflare
+vary: Origin, X-HTTP-Method-Override, Accept-Encoding
+via: 2.0 heroku-router
+x-content-type-options: nosniff
+x-powered-by: Express
+x-ratelimit-limit: 1000
+x-ratelimit-remaining: 999
+x-ratelimit-reset: 1784594411
+cf-cache-status: DYNAMIC
+CF-RAY: a1e626395f3fd833-GRU
+alt-svc: h3=":443"; ma=86400'
+00:39:34.851 [gatling-1-2] DEBUG io.gatling.http.client.impl.HttpAppHandler -- Read msg='DefaultLastHttpContent(data: PooledSlicedByteBuf(ridx: 0, widx: 89, cap: 89/89, unwrapped: PooledUnsafeDirectByteBuf(ridx: 1330, widx: 1330, cap: 1352)), decoderResult: success)'
+00:39:34.851 [gatling-1-2] DEBUG io.gatling.http.client.pool.ChannelPool -- Offering channel entry ChannelPoolKey{clientId=1, remoteKey=RemoteKey{targetHostBaseUrl='https://jsonplaceholder.typicode.com', proxyHost='null', proxyPort=0}} to pool
+00:39:34.886 [gatling-1-2] DEBUG io.gatling.core.action.Exit -- End user #1
+00:39:34.888 [pool-1-thread-8] DEBUG io.gatling.core.controller.inject.Injector -- End user #Mock público - JSONPlaceholder POST
+00:39:34.889 [pool-1-thread-8] INFO io.gatling.core.controller.inject.Injector -- All users of scenario Mock público - JSONPlaceholder POST are stopped
+00:39:34.889 [pool-1-thread-8] INFO io.gatling.core.controller.inject.Injector -- Stopping
+00:39:34.890 [pool-1-thread-11] INFO io.gatling.core.controller.Controller -- Injector has stopped, initiating graceful stop
+
+========================================================================================================================
+2026-07-21 00:39:34 GMT                                                                               0s elapsed
+---- Requests -----------------------------------------------------------------------|---Total---|-----OK----|----KO----
+> Global                                                                             |         1 |         1 |         0
+> POST simulado                                                                      |         1 |         1 |         0
+
+---- Mock público - JSONPlaceholder POST -------------------------------------------------------------------------------
+[###############################################################################################################]   100%
+          waiting:         0 / active:         0  / done:         1
+========================================================================================================================
+
+00:39:34.912 [pool-1-thread-12] DEBUG io.gatling.core.controller.Controller -- StatsEngine was stopped
+00:39:34.912 [main] INFO io.gatling.app.Runner -- Simulation bci.cards.simulation.PublicJsonPlaceholderPostSmokeSimulation completed in 0 seconds
+00:39:34.919 [gatling-1-2] DEBUG io.netty.buffer.PoolThreadCache -- Freed 12 thread-local buffer(s) from thread: gatling-1-2
+00:39:34.920 [gatling-1-1] DEBUG io.netty.buffer.PoolThreadCache -- Freed 23 thread-local buffer(s) from thread: gatling-1-1
+Parsing log file(s)...
+00:39:34.923 [main] INFO io.gatling.charts.stats.LogFileReader$ -- Collected /app/gatling-runner/build/reports/gatling/publicjsonplaceholderpostsmokesimulation-20260721003934166/simulation.log from publicjsonplaceholderpostsmokesimulation-20260721003934166
+00:39:34.925 [main] INFO io.gatling.charts.stats.FirstPassParser -- First pass
+00:39:34.929 [main] INFO io.gatling.charts.stats.FirstPassParser -- First pass done: read 5 records
+00:39:34.935 [main] INFO io.gatling.charts.stats.SecondPassParser -- Second pass
+00:39:34.948 [main] INFO io.gatling.charts.stats.SecondPassParser -- Second pass: read 5 records
+Parsing log file(s) done in 0s.
+Generating reports...
+
+========================================================================================================================
+---- Global Information -------------------------------------------------------------|---Total---|-----OK----|----KO----
+> request count                                                                      |         1 |         1 |         -
+> min response time (ms)                                                             |       307 |       307 |         -
+> max response time (ms)                                                             |       307 |       307 |         -
+> mean response time (ms)                                                            |       307 |       307 |         -
+> response time std deviation (ms)                                                   |         0 |         0 |         -
+> response time 50th percentile (ms)                                                 |       307 |       307 |         -
+> response time 75th percentile (ms)                                                 |       307 |       307 |         -
+> response time 95th percentile (ms)                                                 |       307 |       307 |         -
+> response time 99th percentile (ms)                                                 |       307 |       307 |         -
+> mean throughput (rps)                                                              |         1 |         1 |         -
+---- Response Time Distribution ----------------------------------------------------------------------------------------
+> OK: t < 800 ms                                                                                              1   (100%)
+> OK: 800 ms <= t < 1200 ms                                                                                   0     (0%)
+> OK: t >= 1200 ms                                                                                            0     (0%)
+> KO                                                                                                          0     (0%)
+========================================================================================================================
+
+Reports generated, please open the following file: file:///app/gatling-runner/build/reports/gatling/publicjsonplaceholderpostsmokesimulation-20260721003934166/index.html
+Global: count of failed events is 0.0 : true (actual : 0.0)
+Global: max of response time is less than 10000.0 : true (actual : 307.0)
+
+BUILD SUCCESSFUL in 24s
+2 actionable tasks: 2 executed
+[CONTROL] Reporte HTML agregado a results/gatling-report/index.html
+[CONTROL] Estado final: SUCCEEDED

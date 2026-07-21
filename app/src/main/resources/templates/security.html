@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <title>Seguridad · Gatling Control Center</title>
+    <style>
+        :root{color-scheme:dark;--bg:#07111f;--panel:#101d30;--line:#273a57;--text:#edf4ff;--muted:#91a6c3;--rose:#fb7185;--amber:#f59e0b;--red:#ef4444}
+        *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 85% 5%,#491b34 0,transparent 30%),var(--bg);color:var(--text);font-family:Inter,"Segoe UI",sans-serif}
+        .shell{width:min(1240px,calc(100% - 32px));margin:auto;padding:32px 0}.top{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:24px}.top a{color:#7dd3fc}.muted{color:var(--muted)}
+        .panel{background:rgba(16,29,48,.95);border:1px solid var(--line);border-radius:20px;padding:22px;margin-bottom:20px}.toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+        button,.download{border:0;border-radius:11px;padding:11px 16px;font-weight:800;text-decoration:none;cursor:pointer}.primary{background:var(--rose);color:#230914}.download{background:#34d399;color:#04150f}.download.disabled{opacity:.4;pointer-events:none}
+        .counts{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}.count{padding:16px;border:1px solid var(--line);border-radius:14px}.count strong{font-size:1.8rem;display:block}.critical strong{color:#f43f5e}.high strong{color:#fb7185}.medium strong{color:#fbbf24}
+        .table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{padding:12px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}th{color:#a9bad1;font-size:.78rem;text-transform:uppercase}td{font-size:.88rem}.sev{font-weight:900}.CRITICAL{color:#f43f5e}.HIGH{color:#fb7185}.MEDIUM{color:#fbbf24}
+        pre{background:#030914;border:1px solid #1e293b;border-radius:14px;padding:16px;max-height:320px;overflow:auto;color:#8fffd1;white-space:pre-wrap}.notice{border-left:3px solid var(--amber);padding:10px 14px;background:#241b0b;color:#fcd34d;border-radius:8px}.desc{max-width:420px;line-height:1.4}.ref{color:#7dd3fc}
+        @media(max-width:720px){.counts{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+    </style>
+</head>
+<body><main class="shell">
+    <div class="top"><div><div class="muted">Gatling Control Center</div><h1>Análisis de vulnerabilidades</h1></div><a th:href="@{/}">← Menú principal</a></div>
+    <section class="panel">
+        <div class="toolbar"><button id="scanBtn" class="primary">Ejecutar análisis</button><a id="downloadBtn" class="download disabled" href="./api/security/reports">Descargar reporte</a><strong id="status">NOT_RUN</strong></div>
+        <p class="notice">Ejecuta un análisis cruzado con OWASP Dependency-Check y Trivy. La primera ejecución descarga sus bases y puede tardar varios minutos. El resultado es preventivo y no reemplaza la aprobación formal de Veracode/Master Security.</p>
+        <div class="counts"><div class="count critical">Críticas<strong id="criticalCount">0</strong></div><div class="count high">Altas<strong id="highCount">0</strong></div><div class="count medium">Medias<strong id="mediumCount">0</strong></div></div>
+    </section>
+    <section class="panel"><h2>Hallazgos priorizados</h2><div class="table-wrap"><table><thead><tr><th>Motor</th><th>Severidad</th><th>CVSS</th><th>CVE</th><th>Componente</th><th>Corrección</th><th>Descripción</th><th>Referencia</th></tr></thead><tbody id="findings"><tr><td colspan="8" class="muted">Ejecuta el análisis para obtener resultados.</td></tr></tbody></table></div></section>
+    <section class="panel"><h2>Log del analizador</h2><pre id="logs">Sin ejecución.</pre></section>
+</main>
+<script>
+const scanBtn=document.getElementById('scanBtn'),statusEl=document.getElementById('status'),downloadBtn=document.getElementById('downloadBtn'),rows=document.getElementById('findings'),logs=document.getElementById('logs');
+const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function json(url,options){const response=await fetch(url,{cache:'no-store',...options});const body=await response.json();if(!response.ok)throw new Error(body.message||`HTTP ${response.status}`);return body}
+async function refresh(){try{const state=await json('./api/security/status');statusEl.textContent=state.status;scanBtn.disabled=state.status==='RUNNING'||state.status==='QUEUED';if(state.report_available){downloadBtn.classList.remove('disabled');await loadFindings()}const response=await fetch(`./api/security/logs?_ts=${Date.now()}`,{cache:'no-store'});logs.textContent=await response.text()||'Sin log.';if(state.status==='RUNNING'||state.status==='QUEUED')setTimeout(refresh,2500)}catch(error){statusEl.textContent=`ERROR: ${error.message}`}}
+async function loadFindings(){const data=await json('./api/security/findings');document.getElementById('criticalCount').textContent=data.counts.CRITICAL;document.getElementById('highCount').textContent=data.counts.HIGH;document.getElementById('mediumCount').textContent=data.counts.MEDIUM;rows.innerHTML=data.findings.length?data.findings.map(v=>`<tr><td>${esc(v.scanner)}</td><td class="sev ${esc(v.severity)}">${esc(v.severity)}</td><td>${esc(v.score)}</td><td>${esc(v.cve)}</td><td>${esc(v.component)}</td><td>${esc(v.fixed_version||v.recommendation||'-')}</td><td class="desc">${esc(v.description)}</td><td>${v.reference?`<a class="ref" target="_blank" rel="noopener noreferrer" href="${esc(v.reference)}">Fuente</a>`:'-'}</td></tr>`).join(''):'<tr><td colspan="8" class="muted">No se encontraron vulnerabilidades críticas, altas o medias.</td></tr>'}
+scanBtn.addEventListener('click',async()=>{scanBtn.disabled=true;try{await json('./api/security/scan',{method:'POST'});refresh()}catch(error){statusEl.textContent=`ERROR: ${error.message}`;scanBtn.disabled=false}});refresh();
+</script></body></html>

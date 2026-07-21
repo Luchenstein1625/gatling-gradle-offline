@@ -1,0 +1,24 @@
+plugins {
+    id 'scala'
+    id 'io.gatling.gradle' version '3.15.1'
+}
+
+repositories {
+    mavenCentral()
+}
+
+def simulationsDirectory = System.getenv('PERFORMANCE_SIMULATIONS_DIR') ?: '/app/data/simulations'
+
+sourceSets {
+    gatling {
+        scala.srcDirs = [simulationsDirectory]
+        resources.srcDirs = []
+    }
+}
+
+gatling {
+    gatlingVersion = '3.15.1'
+    scalaVersion = '2.13.18'
+    includeMainOutput = false
+    includeTestOutput = false
+}

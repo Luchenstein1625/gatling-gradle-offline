@@ -2,10 +2,11 @@ package cl.bci.vaultchecker.controller;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.vault.core.VaultTemplate;
-import org.springframework.vault.support.Versioned;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.CacheControl;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,14 +16,10 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,15 +35,19 @@ public class VaultDashboardController {
     // lectura directa con source/fingerprint y ajustes de rutas Vault.
 
     private final ObjectProvider<VaultTemplate> vaultTemplateProvider;
+    private final Environment environment;
 
-    @Value("${spring.cloud.vault.kv.application-name:${VAULT_KV_APPLICATION_NAME:token_pruebas}}")
+    @Value("${spring.cloud.vault.application-name:token_pruebas}")
     private String vaultKvApplicationName;
 
-    @Value("${spring.cloud.vault.kv.profiles:${VAULT_KV_PROFILES:qa}}")
+    @Value("${spring.profiles.active:qa}")
     private String vaultKvProfiles;
 
     @Value("${spring.cloud.vault.kv.backend:secret}")
     private String vaultBackend;
+
+    @Value("${VAULT_SECRET_KEY_NAME:token}")
+    private String vaultSecretKeyName;
 
     @Value("${VAULT_ENABLED:true}")
     private boolean vaultEnabled;
@@ -66,23 +67,34 @@ public class VaultDashboardController {
     private final Deque<Map<String, Object>> diagnosticEvents = new ArrayDeque<>();
     private volatile Map<String, Object> lastPrecheck = new LinkedHashMap<>();
 
-    public VaultDashboardController(ObjectProvider<VaultTemplate> vaultTemplateProvider) {
+    public VaultDashboardController(
+            ObjectProvider<VaultTemplate> vaultTemplateProvider,
+            Environment environment
+    ) {
         this.vaultTemplateProvider = vaultTemplateProvider;
+        this.environment = environment;
     }
-
-    // Lee una clave del secreto 'token_pruebas' guardado en Vault.
-    // Cambia "token" por el nombre de alguna clave real que esté dentro de tu secret.
-    @Value("${token:Clave-No-Encontrada}")
-    private String secretoVault;
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> probarConexionVault() {
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "SUCCESS");
-        response.put("mensaje", "Conexión a HashiCorp Vault Exitosa");
-        response.put("secreto_recuperado", maskSecret(secretoVault));
-        
-        return ResponseEntity.ok(response);
+        Map<String, Object> response = new LinkedHashMap<>();
+        String secretoVault = environment.getProperty(vaultSecretKeyName);
+        boolean found = secretoVault != null && !secretoVault.isBlank();
+        boolean localMock = !vaultEnabled && found;
+        String status = localMock ? "LOCAL_MOCK" : found ? "SUCCESS" : vaultEnabled ? "NOT_FOUND" : "DISABLED";
+        String source = localMock ? "LOCAL_ENVIRONMENT" : found ? "VAULT" : "NONE";
+        response.put("status", status);
+        response.put("mensaje", localMock
+                ? "Credencial ficticia cargada desde el entorno local; Vault está deshabilitado"
+                : found
+                    ? "Secreto cargado por Spring desde Vault"
+                    : "Spring no encontró la clave configurada '" + vaultSecretKeyName + "'");
+        response.put("source", source);
+        response.put("vault_enabled", vaultEnabled);
+        response.put("key_name", vaultSecretKeyName);
+        response.put("valor_configurado", localMock ? "LOCAL_MOCK_ONLY" : maskSecret(secretoVault));
+
+        return noStoreResponse(response);
     }
 
     @GetMapping("/hola-mundo")
@@ -91,12 +103,12 @@ public class VaultDashboardController {
         response.put("status", "SUCCESS");
         response.put("mensaje", "hola mundo");
         response.put("endpoint", "/vault-test/hola-mundo");
-        return ResponseEntity.ok(response);
+        return noStoreResponse(response);
     }
 
     @GetMapping("/precheck")
     public ResponseEntity<Map<String, Object>> precheckVault() {
-        return ResponseEntity.ok(runPrecheck(true));
+        return noStoreResponse(runPrecheck(true));
     }
 
     @Scheduled(fixedDelayString = "${vault.diagnostics.precheck-interval-ms:60000}")
@@ -117,7 +129,7 @@ public class VaultDashboardController {
         response.put("failed_items", failedItems);
         response.put("probable_root_cause", inferProbableRootCause(failedItems));
         response.put("last_precheck_at", snapshot.get("timestamp"));
-        return ResponseEntity.ok(response);
+        return noStoreResponse(response);
     }
 
     @GetMapping("/events")
@@ -132,7 +144,14 @@ public class VaultDashboardController {
         response.put("count", events.size());
         response.put("limit", safeLimit);
         response.put("events", events);
-        return ResponseEntity.ok(response);
+        return noStoreResponse(response);
+    }
+
+    private ResponseEntity<Map<String, Object>> noStoreResponse(Map<String, Object> body) {
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noStore())
+                .header("Pragma", "no-cache")
+                .body(body);
     }
 
     private Map<String, Object> runPrecheck(boolean recordSuccessEvent) {
@@ -190,20 +209,19 @@ public class VaultDashboardController {
 
         if (templateOk && vaultEnabled) {
             try {
-                String normalizedPath = normalizePath(requestedPath, vaultBackend);
-                Map<String, Object> readResult = readSecretData(vaultTemplate, normalizedPath);
-                boolean found = (Boolean) readResult.get("found");
+                String secretValue = environment.getProperty(vaultSecretKeyName);
+                boolean found = secretValue != null && !secretValue.isBlank();
                 addCheck(
                         checks,
                         "vault_secret_read",
                         found,
                         found
-                                ? "Lectura OK. keys=" + readResult.get("keys")
-                                : "Ruta accesible pero sin datos"
+                                ? "Propiedad cargada por Spring. key=" + vaultSecretKeyName
+                                : "Spring no cargó la clave configurada. Verificar nombre, ruta y permisos AppRole"
                 );
-                response.put("normalized_path", normalizedPath);
-                response.put("keys", readResult.get("keys"));
-                response.put("values_count", readResult.get("values_count"));
+                response.put("normalized_path", vaultKvApplicationName + "/" + vaultKvProfiles);
+                response.put("keys", found ? List.of(vaultSecretKeyName) : List.of());
+                response.put("values_count", found ? 1 : 0);
             } catch (Exception ex) {
                 addCheck(
                         checks,
@@ -261,22 +279,6 @@ public class VaultDashboardController {
         return failed;
     }
 
-    private String normalizePath(String path, String backend) {
-        if (path == null || path.isBlank()) {
-            return "token_pruebas/qa";
-        }
-
-        String normalized = path.trim();
-        String backendPrefix = backend + "/";
-        if (normalized.startsWith(backendPrefix)) {
-            normalized = normalized.substring(backendPrefix.length());
-        }
-        if (normalized.startsWith("data/")) {
-            normalized = normalized.substring("data/".length());
-        }
-        return normalized;
-    }
-
     private String buildRequestedPath() {
         String backend = vaultBackend == null ? "secret" : vaultBackend.trim();
         if (backend.isEmpty()) {
@@ -299,31 +301,6 @@ public class VaultDashboardController {
         }
 
         return backend + "/" + appName + "/" + firstProfile;
-    }
-
-    private Map<String, Object> readSecretData(VaultTemplate vaultTemplate, String normalizedPath) {
-        Versioned<Map<String, Object>> secret = vaultTemplate
-                .opsForVersionedKeyValue(vaultBackend)
-                .get(normalizedPath);
-
-        Map<String, Object> result = new LinkedHashMap<>();
-        if (secret == null || secret.getData() == null || secret.getData().isEmpty()) {
-            result.put("found", false);
-            result.put("keys", List.of());
-            result.put("values_count", 0);
-            result.put("token_masked", "<sin valor>");
-            result.put("token_fingerprint", "<sin valor>");
-            return result;
-        }
-
-        result.put("found", true);
-        result.put("keys", secret.getData().keySet());
-        result.put("values_count", secret.getData().size());
-        Object tokenValue = secret.getData().get("token");
-        String tokenString = tokenValue == null ? null : String.valueOf(tokenValue);
-        result.put("token_masked", maskSecret(tokenString));
-        result.put("token_fingerprint", fingerprint(tokenString));
-        return result;
     }
 
     private void addCheck(List<Map<String, Object>> checks, String name, boolean ok, String detail) {
@@ -400,24 +377,6 @@ public class VaultDashboardController {
         }
         masked.append(suffix);
         return masked.toString();
-    }
-
-    private String fingerprint(String value) {
-        if (value == null || value.isBlank()) {
-            return "<vacío>";
-        }
-
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(value.getBytes(StandardCharsets.UTF_8));
-            StringBuilder hex = new StringBuilder();
-            for (byte b : hash) {
-                hex.append(String.format("%02x", b));
-            }
-            return hex.substring(0, 12);
-        } catch (NoSuchAlgorithmException ex) {
-            return "sha256-unavailable";
-        }
     }
 
     private void recordEvent(String level, String code, String message, Map<String, Object> payload) {

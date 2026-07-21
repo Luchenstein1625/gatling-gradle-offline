@@ -6,6 +6,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import javax.servlet.http.HttpServletResponse;
+
 import java.io.File;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -36,14 +38,17 @@ public class VaultUiController {
     @Value("${VAULT_TRUST_STORE:}")
     private String trustStore;
 
-    @Value("${spring.cloud.vault.kv.application-name:${VAULT_KV_APPLICATION_NAME:token_pruebas}}")
+    @Value("${spring.cloud.vault.application-name:token_pruebas}")
     private String vaultKvApplicationName;
 
-    @Value("${spring.cloud.vault.kv.profiles:${VAULT_KV_PROFILES:qa}}")
+    @Value("${spring.profiles.active:qa}")
     private String vaultKvProfiles;
 
     @Value("${spring.cloud.vault.kv.backend:secret}")
     private String vaultBackend;
+
+    @Value("${VAULT_SECRET_KEY_NAME:BCI_LOGIN_BASIC_AUTH}")
+    private String vaultSecretKeyName;
 
     @Value("${app.build.display:dev}")
     private String buildDisplayVersion;
@@ -57,8 +62,36 @@ public class VaultUiController {
         this.environment = environment;
     }
 
+    @GetMapping({"/", "/menu"})
+    public String menu(Model model, HttpServletResponse response) {
+        disableCache(response);
+        model.addAttribute("appName", appName);
+        model.addAttribute("profile", profile);
+        model.addAttribute("buildDisplayVersion", buildDisplayVersion);
+        return "menu";
+    }
+
+    @GetMapping("/performance")
+    public String performance(Model model, HttpServletResponse response) {
+        disableCache(response);
+        model.addAttribute("appName", appName);
+        model.addAttribute("profile", profile);
+        model.addAttribute("buildDisplayVersion", buildDisplayVersion);
+        return "performance";
+    }
+
+    @GetMapping("/security")
+    public String security(Model model, HttpServletResponse response) {
+        disableCache(response);
+        model.addAttribute("appName", appName);
+        model.addAttribute("profile", profile);
+        model.addAttribute("buildDisplayVersion", buildDisplayVersion);
+        return "security";
+    }
+
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
+    public String dashboard(Model model, HttpServletResponse response) {
+        disableCache(response);
         boolean networkOk = false;
         String networkError = null;
 
@@ -88,6 +121,7 @@ public class VaultUiController {
         model.addAttribute("vaultKvApplicationName", vaultKvApplicationName);
         model.addAttribute("vaultKvProfiles", vaultKvProfiles);
         model.addAttribute("vaultBackend", vaultBackend);
+        model.addAttribute("vaultSecretKeyName", vaultSecretKeyName);
         model.addAttribute("buildDisplayVersion", buildDisplayVersion);
         model.addAttribute("buildTimestamp", buildTimestamp);
         model.addAttribute("networkOk", networkOk);
@@ -96,6 +130,12 @@ public class VaultUiController {
         model.addAttribute("probedSecrets", probedSecrets);
 
         return "dashboard";
+    }
+
+    private void disableCache(HttpServletResponse response) {
+        response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+        response.setHeader("Pragma", "no-cache");
+        response.setDateHeader("Expires", 0);
     }
 
     private String resolveValue(String key) {

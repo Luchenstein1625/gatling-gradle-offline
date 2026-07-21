@@ -24,6 +24,7 @@ spec:
       containers:
       - name: vault-checker-node
         image: bcirg3crtrgandes01acr001.azurecr.io/gatling/gatling-gen3-docker-fast-api:0.0.1
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
         env:
@@ -33,46 +34,12 @@ spec:
           value: "/gatling/gatling-gen3-app/v0.1"
         - name: SPRING_CLOUD_CONFIG_ENABLED
           value: "false"
-        - name: SPRING_CLOUD_VAULT_ENABLED
-          value: "true"
-        - name: SPRING_CLOUD_VAULT_SCHEME
-          value: "https"
-        - name: SPRING_CLOUD_VAULT_HOST
-          value: "vault-server-service.bci-infra"
-        - name: SPRING_CLOUD_VAULT_PORT
-          value: "8200"
-        - name: SPRING_CLOUD_VAULT_AUTHENTICATION
-          value: "APPROLE"
-        - name: SPRING_CLOUD_VAULT_APP_ROLE_ROLE_ID
-          valueFrom:
-            secretKeyRef:
-              name: vault-role-secret-id
-              key: VAULT_ROLE_ID
-        - name: SPRING_CLOUD_VAULT_APP_ROLE_SECRET_ID
-          valueFrom:
-            secretKeyRef:
-              name: vault-role-secret-id
-              key: VAULT_SECRET_ID
-        - name: SPRING_CLOUD_VAULT_KV_ENABLED
-          value: "true"
-        - name: SPRING_CLOUD_VAULT_KV_BACKEND
-          value: "secret"
-        - name: SPRING_CLOUD_VAULT_KV_APPLICATION_NAME
-          value: "token_pruebas"
-        - name: SPRING_CLOUD_VAULT_KV_PROFILES
-          value: "qa"
-        - name: SPRING_CLOUD_VAULT_SSL_TRUST_STORE
-          value: "file:/vol-ms/pubcerts.ts"
-        - name: SPRING_CLOUD_VAULT_SSL_TRUST_STORE_PASSWORD
-          value: "changeit"
-        - name: SPRING_CLOUD_VAULT_FAIL_FAST
-          value: "false"
         - name: MANAGEMENT_ENDPOINTS_WEB_BASE_PATH
           value: "/"
         - name: VAULT_ENABLED
           value: "true"
         - name: VAULT_FAIL_FAST
-          value: "false"
+          value: "true"
         - name: VAULT_SCHEME
           value: "https"
         - name: VAULT_HOST
@@ -91,10 +58,12 @@ spec:
             secretKeyRef:
               name: vault-role-secret-id
               key: VAULT_SECRET_ID
-        - name: VAULT_KV_APPLICATION_NAME
-          value: "token_pruebas"
-        - name: VAULT_KV_PROFILES
-          value: "qa"
+        - name: VAULT_SECRET_KEY_NAME
+          value: "token"
+        - name: PERFORMANCE_SIMULATIONS_DIR
+          value: "/app/data/simulations"
+        - name: GATLING_COMMAND
+          value: "/opt/gatling/bin/gatling.sh"
         - name: VAULT_TRUST_STORE
           value: "file:/vol-ms/pubcerts.ts"
         - name: VAULT_TRUST_STORE_PWD
