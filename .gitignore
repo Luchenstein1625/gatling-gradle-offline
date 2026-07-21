@@ -1,0 +1,29 @@
+# Gradle y artefactos compilados
+.gradle/
+**/.gradle/
+build/
+**/build/
+bin/
+**/bin/
+*.class
+*.jar
+
+# Archivos del sistema operativo
+.DS_Store
+**/.DS_Store
+__MACOSX/
+
+# Datos generados en ejecución (se conservan fuera del control de versiones)
+data/security/database/
+data/security/reports/
+
+# Bases y cachés de análisis de seguridad
+data/security/database/
+data/security/trivy-cache/
+
+# Reportes generados
+data/security/reports/
+
+# Bases de datos locales
+*.mv.db
+*.trace.db

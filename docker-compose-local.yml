@@ -40,7 +40,7 @@ services:
       VAULT_TRUST_STORE: "${VAULT_TRUST_STORE:-}"
       VAULT_TRUST_STORE_PWD: "${VAULT_TRUST_STORE_PWD:-}"
       PERFORMANCE_SIMULATIONS_DIR: /app/data/simulations
-      GATLING_COMMAND: "${GATLING_COMMAND:-/opt/gradle/gradle-8.6/bin/gradle}"
+      GATLING_COMMAND: /opt/gradle/gradle-8.6/bin/gradle
       GATLING_PROJECT_DIR: /app/gatling-runner
       SECURITY_PROJECT_DIR: /app/security-runner
       SECURITY_GRADLE_COMMAND: /opt/gradle/gradle-8.6/bin/gradle

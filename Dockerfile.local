@@ -29,7 +29,8 @@ COPY app/ ./app/
 COPY gatling-runner/ ./gatling-runner/
 COPY security-runner/ ./security-runner/
 
-RUN cd app && gradle --offline --no-daemon bootJar --stacktrace
+# La migración de seguridad descarga la línea soportada Spring Boot 3.5 / Spring Cloud 2025.
+RUN cd app && gradle --no-daemon clean test bootJar --stacktrace
 # La primera construcción local descarga el plugin oficial, Gatling y Scala.
 RUN gradle -p /workspace/gatling-runner --no-daemon dependencies --configuration gatlingRuntimeClasspath
 # Prepara el plugin; la base NVD se descarga al ejecutar el primer análisis desde el dashboard.
