@@ -47,7 +47,7 @@ public class SecurityScanService {
 
     public SecurityScanService(
             ObjectMapper objectMapper,
-            @Value("${security.scan.gradle-command:${GATLING_COMMAND:/opt/gradle/gradle-8.6/bin/gradle}}") String gradleCommand,
+            @Value("${security.scan.gradle-command:${SECURITY_GRADLE_COMMAND:/opt/gradle/gradle-8.6/bin/gradle}}") String gradleCommand,
             @Value("${security.scan.trivy-command:${TRIVY_COMMAND:/usr/local/bin/trivy}}") String trivyCommand,
             @Value("${security.scan.project-dir:${SECURITY_PROJECT_DIR:/app/security-runner}}") String projectDir,
             @Value("${security.scan.report-dir:${SECURITY_REPORT_DIR:/app/data/security/reports}}") String reportDir

@@ -1,14 +1,10 @@
-# ==============================================================================
-# STAGE 1: Dependency Cache (desde carpeta offline)
-# ==============================================================================
-# CHANGESET-DOCKERFILE-2026-07-20:
-# Subir este archivo para imprimir BUILD_CHANGELOG en docker compose build.
-FROM eclipse-temurin:11-jdk-jammy AS dependency-cache
+FROM aquasec/trivy:0.72.0 AS trivy
+
+FROM eclipse-temurin:17-jdk-jammy AS dependency-cache
 
 ENV GRADLE_USER_HOME=/opt/gradle-cache
 WORKDIR /workspace
 
-# Requiere artefactos offline previamente preparados en el repo (archivos por partes).
 COPY offline-deps/gradle/gradle-8.6.tar.gz.part-* /tmp/
 COPY offline-deps/gradle/gradle-cache.tar.gz.part-* /tmp/
 
@@ -17,59 +13,59 @@ RUN mkdir -p /opt \
  && cat $(ls /tmp/gradle-cache.tar.gz.part-* | sort) > /tmp/gradle-cache.tar.gz \
  && tar -xzf /tmp/gradle-8.6.tar.gz -C /opt \
  && tar -xzf /tmp/gradle-cache.tar.gz -C /opt \
- && test -d /opt/gradle/gradle-8.6 \
- && test -d /opt/gradle-cache \
- && rm -f /tmp/gradle-8.6.tar.gz /tmp/gradle-cache.tar.gz /tmp/gradle-8.6.tar.gz.part-* /tmp/gradle-cache.tar.gz.part-*
+ && rm -f /tmp/gradle-8.6.tar.gz /tmp/gradle-cache.tar.gz /tmp/*.part-*
 
 ENV PATH="/opt/gradle/gradle-8.6/bin:${PATH}"
 
-# ==============================================================================
-# STAGE 2: Builder (Java 11)
-# ==============================================================================
-FROM eclipse-temurin:11-jdk-jammy AS builder
+FROM eclipse-temurin:17-jdk-jammy AS builder
 
 ENV GRADLE_USER_HOME=/opt/gradle-cache
+ENV PATH="/opt/gradle/gradle-8.6/bin:${PATH}"
 WORKDIR /workspace
 
 COPY --from=dependency-cache /opt/gradle /opt/gradle
 COPY --from=dependency-cache /opt/gradle-cache /opt/gradle-cache
-ENV PATH="/opt/gradle/gradle-8.6/bin:${PATH}"
-
-COPY BUILD_CHANGELOG.md /workspace/BUILD_CHANGELOG.md
 COPY app/ ./app/
+COPY gatling-runner/ ./gatling-runner/
+COPY security-runner/ ./security-runner/
 
-RUN printf '\n=== BUILD CHANGELOG ===\n' \
- && cat /workspace/BUILD_CHANGELOG.md \
- && printf '=== END BUILD CHANGELOG ===\n\n' \
- && cd app \
- && gradle --offline --no-daemon bootJar --stacktrace
+RUN cd app && gradle --offline --no-daemon bootJar --stacktrace
+# La primera construcción local descarga el plugin oficial, Gatling y Scala.
+RUN gradle -p /workspace/gatling-runner --no-daemon dependencies --configuration gatlingRuntimeClasspath
+# Prepara el plugin; la base NVD se descarga al ejecutar el primer análisis desde el dashboard.
+RUN gradle -p /workspace/security-runner --no-daemon tasks --all
 
-# ==============================================================================
-# STAGE 3: Runtime (Java 11)
-# ==============================================================================
-FROM eclipse-temurin:11-jre-jammy AS runtime
+FROM eclipse-temurin:17-jdk-jammy AS runtime
 
-# En STAGE 3 (Runtime) de tu Dockerfile:
-ENV API_PREFIX=/gatling/gatling-gen3-app/v0.1 \
-    SERVER_SERVLET_CONTEXT_PATH=/gatling/gatling-gen3-app/v0.1
-    
-RUN groupadd -g 1001 gatling && \
-    useradd -u 1001 -g gatling -m -d /home/gatling gatling
-
-ENV APP_DATA_ROOT=/app/data \
+ENV GRADLE_USER_HOME=/opt/gradle-cache \
+    PATH="/opt/gradle/gradle-8.6/bin:${PATH}" \
+    APP_DATA_ROOT=/app/data \
     RESULTS_DIR=/app/data/executions \
+    PERFORMANCE_SIMULATIONS_DIR=/app/data/simulations \
+    GATLING_COMMAND=/opt/gradle/gradle-8.6/bin/gradle \
+    GATLING_PROJECT_DIR=/app/gatling-runner \
+    SECURITY_PROJECT_DIR=/app/security-runner \
+    SECURITY_SCAN_TARGET=/app/app.jar \
+    SECURITY_REPORT_DIR=/app/data/security/reports \
+    SECURITY_DATA_DIR=/app/data/security/database \
+    API_PREFIX=/gatling/gatling-gen3-app/v0.1 \
+    SERVER_SERVLET_CONTEXT_PATH=/gatling/gatling-gen3-app/v0.1 \
     HOME=/home/gatling \
-    JAVA_TOOL_OPTIONS="-XX:+UseG1GC -Xms32m -Xmx160m -XX:MaxMetaspaceSize=128m"
+    JAVA_TOOL_OPTIONS="-XX:+UseG1GC -Xms32m -Xmx384m -XX:MaxMetaspaceSize=192m"
 
+RUN groupadd -g 1001 gatling && useradd -u 1001 -g gatling -m -d /home/gatling gatling
 WORKDIR /app
 
-# Copiamos el JAR resultante
+COPY --from=builder /opt/gradle /opt/gradle
+COPY --from=builder /opt/gradle-cache /opt/gradle-cache
 COPY --from=builder /workspace/app/build/libs/app.jar /app/app.jar
+COPY --from=builder /workspace/gatling-runner /app/gatling-runner
+COPY --from=builder /workspace/security-runner /app/security-runner
+COPY --from=trivy /usr/local/bin/trivy /usr/local/bin/trivy
 
-RUN mkdir -p /app/data/configurations /app/data/executions && \
-    chown -R gatling:gatling /app
+RUN mkdir -p /app/data/simulations /app/data/executions /app/data/security/reports /app/data/security/database \
+ && chown -R gatling:gatling /app /opt/gradle-cache /home/gatling
 
 USER gatling
 EXPOSE 8080
-
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

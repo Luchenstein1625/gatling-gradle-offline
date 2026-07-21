@@ -5,7 +5,7 @@ services:
     build:
       context: .
       # En el primer build descarga y guarda en la imagen Gatling, Scala y sus dependencias Gradle.
-      dockerfile: Dockerfile.local
+      dockerfile: Dockerfile
     container_name: gatling-control-api
     ports:
       - "8080:8080"
@@ -43,6 +43,7 @@ services:
       GATLING_COMMAND: "${GATLING_COMMAND:-/opt/gradle/gradle-8.6/bin/gradle}"
       GATLING_PROJECT_DIR: /app/gatling-runner
       SECURITY_PROJECT_DIR: /app/security-runner
+      SECURITY_GRADLE_COMMAND: /opt/gradle/gradle-8.6/bin/gradle
       SECURITY_SCAN_TARGET: /app/app.jar
       SECURITY_REPORT_DIR: /app/data/security/reports
       SECURITY_DATA_DIR: /app/data/security/database

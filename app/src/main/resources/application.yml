@@ -43,7 +43,7 @@ performance:
 
 security:
   scan:
-    gradle-command: ${GATLING_COMMAND:/opt/gradle/gradle-8.6/bin/gradle}
+    gradle-command: ${SECURITY_GRADLE_COMMAND:/opt/gradle/gradle-8.6/bin/gradle}
     project-dir: ${SECURITY_PROJECT_DIR:/app/security-runner}
     report-dir: ${SECURITY_REPORT_DIR:/app/data/security/reports}
     trivy-command: ${TRIVY_COMMAND:/usr/local/bin/trivy}
