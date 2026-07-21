@@ -15,5 +15,16 @@
 
 ## Build offline
 
-- La imagen y el build están preparados para ejecutarse sin acceso a internet.
-- El build local validado usa `docker compose build --no-cache`.
+- La imagen y el build están preparados para ejecutarse sin acceso a Internet.
+- El paquete offline debe contener `eclipse-temurin:17-jdk-jammy`,
+  `aquasec/trivy:0.72.0`, Gradle 8.14.3 y el caché Gradle vigente.
+- En un equipo conectado, exporta las imágenes con
+  `./scripts/export-offline-images.sh`.
+- En el servidor sin Internet, ejecuta
+  `./scripts/offline-build.sh offline-image-bundle.tgz`.
+- CERT y PROD deben promover la misma imagen por digest; no se debe reconstruir
+  una imagen distinta para PROD.
+
+Los resultados de Gatling y las bases/cachés de OWASP y Trivy se generan en
+`data/` y no se versionan. El control OWASP falla ante hallazgos con CVSS 7.0 o
+superior.

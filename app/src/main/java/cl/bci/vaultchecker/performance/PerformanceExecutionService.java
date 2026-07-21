@@ -48,7 +48,7 @@ public class PerformanceExecutionService {
             Environment environment,
             @Value("${performance.simulations-dir:${PERFORMANCE_SIMULATIONS_DIR:/app/data/simulations}}") String simulationsDir,
             @Value("${performance.executions-dir:${RESULTS_DIR:/app/data/executions}}") String executionsDir,
-            @Value("${performance.gatling-command:${GATLING_COMMAND:/opt/gradle/gradle-8.6/bin/gradle}}") String gatlingCommand,
+            @Value("${performance.gatling-command:${GATLING_COMMAND:/opt/gradle/gradle-8.14.3/bin/gradle}}") String gatlingCommand,
             @Value("${performance.gatling-project-dir:${GATLING_PROJECT_DIR:/app/gatling-runner}}") String gatlingProjectDir,
             @Value("${VAULT_SECRET_KEY_NAME:token}") String secretKeyName
     ) throws IOException {

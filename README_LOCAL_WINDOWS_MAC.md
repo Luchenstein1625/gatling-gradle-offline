@@ -74,7 +74,7 @@ $env:VAULT_ENABLED="false"
 $env:SPRING_CLOUD_VAULT_ENABLED="false"
 $env:VAULT_SECRET_KEY_NAME="BCI_LOGIN_BASIC_AUTH"
 $env:BCI_LOGIN_BASIC_AUTH="LOCAL_MOCK_ONLY"
-$env:GATLING_COMMAND="/opt/gradle/gradle-8.6/bin/gradle"
+$env:GATLING_COMMAND="/opt/gradle/gradle-8.14.3/bin/gradle"
 ```
 
 ### macOS Terminal
@@ -85,7 +85,7 @@ export VAULT_ENABLED="false"
 export SPRING_CLOUD_VAULT_ENABLED="false"
 export VAULT_SECRET_KEY_NAME="BCI_LOGIN_BASIC_AUTH"
 export BCI_LOGIN_BASIC_AUTH="LOCAL_MOCK_ONLY"
-export GATLING_COMMAND="/opt/gradle/gradle-8.6/bin/gradle"
+export GATLING_COMMAND="/opt/gradle/gradle-8.14.3/bin/gradle"
 ```
 
 `LOCAL_MOCK_ONLY` no es una credencial real. Las simulaciones públicas comprueban que la variable exista, pero no la envían en headers, query params ni cuerpos HTTP.
@@ -178,13 +178,13 @@ Gatling: No encontrado
 Para ejecutar, la imagen debe contener:
 
 ```text
-/opt/gradle/gradle-8.6/bin/gradle
+/opt/gradle/gradle-8.14.3/bin/gradle
 ```
 
 Compruébalo con:
 
 ```text
-docker compose exec gatling-api sh -lc "ls -l /opt/gradle/gradle-8.6/bin/gradle && test -f /app/gatling-runner/build.gradle"
+docker compose exec gatling-api sh -lc "ls -l /opt/gradle/gradle-8.14.3/bin/gradle && test -f /app/gatling-runner/build.gradle"
 ```
 
 La imagen local incorpora Gradle y prepara el runner oficial de Gatling para Scala. La primera construcción requiere Internet para descargar el plugin y sus dependencias. Si cambiaste el Dockerfile o venías de una imagen anterior, reconstruye sin caché.

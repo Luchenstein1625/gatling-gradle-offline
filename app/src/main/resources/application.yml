@@ -38,15 +38,17 @@ spring:
 performance:
   simulations-dir: ${PERFORMANCE_SIMULATIONS_DIR:/app/data/simulations}
   executions-dir: ${RESULTS_DIR:/app/data/executions}
-  gatling-command: ${GATLING_COMMAND:/opt/gradle/gradle-8.6/bin/gradle}
+  gatling-command: ${GATLING_COMMAND:/opt/gradle/gradle-8.14.3/bin/gradle}
   gatling-project-dir: ${GATLING_PROJECT_DIR:/app/gatling-runner}
 
 security:
   scan:
-    gradle-command: ${SECURITY_GRADLE_COMMAND:/opt/gradle/gradle-8.6/bin/gradle}
+    gradle-command: ${SECURITY_GRADLE_COMMAND:/opt/gradle/gradle-8.14.3/bin/gradle}
     project-dir: ${SECURITY_PROJECT_DIR:/app/security-runner}
     report-dir: ${SECURITY_REPORT_DIR:/app/data/security/reports}
     trivy-command: ${TRIVY_COMMAND:/usr/local/bin/trivy}
+    target: ${SECURITY_SCAN_TARGET:/app/app.jar}
+    trivy-cache-dir: ${TRIVY_CACHE_DIR:/app/data/security/trivy-cache}
 
 # Endpoint de health check expuesto en /health
 management:

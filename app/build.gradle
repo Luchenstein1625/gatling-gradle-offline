@@ -26,7 +26,25 @@ repositories {
 }
 
 ext {
+    // Línea corporativa validada para la integración Vault. No cambiar de forma
+    // independiente: Boot, Cloud y Vault deben actualizarse como una matriz compatible.
     set('springCloudVersion', "2025.0.3")
+    // Correcciones puntuales de seguridad. No modifican el BOM de Spring Cloud
+    // ni la versión de Vault administrada por ese BOM.
+    set('tomcatVersion', "10.1.57")
+    set('jacksonDatabindVersion', "2.21.5")
+    set('httpCore5Version', "5.4.3")
+}
+
+configurations.configureEach {
+    resolutionStrategy {
+        force "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
+        force "org.apache.tomcat.embed:tomcat-embed-el:${tomcatVersion}"
+        force "org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}"
+        force "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}"
+        force "org.apache.httpcomponents.core5:httpcore5:${httpCore5Version}"
+        force "org.apache.httpcomponents.core5:httpcore5-h2:${httpCore5Version}"
+    }
 }
 
 dependencies {
@@ -39,7 +57,8 @@ dependencies {
     implementation 'org.thymeleaf:thymeleaf:3.1.5.RELEASE'
     implementation 'org.thymeleaf:thymeleaf-spring6:3.1.5.RELEASE'
 
-    // Spring Cloud & Vault Integration
+    // Spring Cloud & Vault Integration. La versión de Vault la administra el BOM
+    // Spring Cloud 2025.0.3; no declarar otra spring-vault-core en paralelo.
     implementation 'org.springframework.cloud:spring-cloud-starter-vault-config'
 
     // Lombok
@@ -54,6 +73,18 @@ dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
     }
+
+    // Sobrescrituras puntuales posteriores a los BOM de Spring. Declararlas aquí
+    // evita que el BOM de Spring Boot vuelva a seleccionar las versiones
+    // vulnerables durante la resolución del runtimeClasspath.
+    dependencies {
+        dependency "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
+        dependency "org.apache.tomcat.embed:tomcat-embed-el:${tomcatVersion}"
+        dependency "org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}"
+        dependency "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}"
+        dependency "org.apache.httpcomponents.core5:httpcore5:${httpCore5Version}"
+        dependency "org.apache.httpcomponents.core5:httpcore5-h2:${httpCore5Version}"
+    }
 }
 
 bootJar {
@@ -63,6 +94,35 @@ bootJar {
 
 test {
     useJUnitPlatform()
+}
+
+tasks.register('verifySecurityDependencyVersions') {
+    doLast {
+        def expected = [
+                'org.apache.tomcat.embed:tomcat-embed-core': tomcatVersion,
+                'com.fasterxml.jackson.core:jackson-databind': jacksonDatabindVersion,
+                'org.apache.httpcomponents.core5:httpcore5': httpCore5Version,
+                'org.springframework.cloud:spring-cloud-starter-vault-config': null
+        ]
+        def resolved = configurations.runtimeClasspath.resolvedConfiguration.resolvedArtifacts
+        expected.each { coordinate, version ->
+            def parts = coordinate.split(':')
+            def artifact = resolved.find {
+                it.moduleVersion.id.group == parts[0] && it.name == parts[1]
+            }
+            if (artifact == null) {
+                throw new GradleException("No se resolvió la dependencia requerida: ${coordinate}")
+            }
+            if (version != null && artifact.moduleVersion.id.version != version) {
+                throw new GradleException("${coordinate} resolvió ${artifact.moduleVersion.id.version}; se esperaba ${version}")
+            }
+            logger.lifecycle("VERIFIED ${coordinate}:${artifact.moduleVersion.id.version}")
+        }
+    }
+}
+
+tasks.named('bootJar') {
+    dependsOn tasks.named('verifySecurityDependencyVersions')
 }
 
 sourceSets {

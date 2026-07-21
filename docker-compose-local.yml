@@ -40,10 +40,10 @@ services:
       VAULT_TRUST_STORE: "${VAULT_TRUST_STORE:-}"
       VAULT_TRUST_STORE_PWD: "${VAULT_TRUST_STORE_PWD:-}"
       PERFORMANCE_SIMULATIONS_DIR: /app/data/simulations
-      GATLING_COMMAND: /opt/gradle/gradle-8.6/bin/gradle
+      GATLING_COMMAND: /opt/gradle/gradle-8.14.3/bin/gradle
       GATLING_PROJECT_DIR: /app/gatling-runner
       SECURITY_PROJECT_DIR: /app/security-runner
-      SECURITY_GRADLE_COMMAND: /opt/gradle/gradle-8.6/bin/gradle
+      SECURITY_GRADLE_COMMAND: /opt/gradle/gradle-8.14.3/bin/gradle
       SECURITY_SCAN_TARGET: /app/app.jar
       SECURITY_REPORT_DIR: /app/data/security/reports
       SECURITY_DATA_DIR: /app/data/security/database
@@ -75,7 +75,9 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8080/gatling/gatling-gen3-app/v0.1/health || exit 1"]
+      # La imagen Temurin no incluye curl. Kubernetes conserva la comprobación
+      # HTTP completa mediante sus probes.
+      test: ["CMD", "bash", "-c", ": </dev/tcp/127.0.0.1/8080"]
       interval: 30s
       timeout: 10s
       retries: 3

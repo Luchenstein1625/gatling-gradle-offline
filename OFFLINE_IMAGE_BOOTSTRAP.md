@@ -21,9 +21,9 @@ chmod +x scripts/prepare-offline-deps.sh
 
 This creates:
 
-- offline-deps/gradle/gradle-8.6.tar.gz.part-000
-- offline-deps/gradle/gradle-8.6.tar.gz.part-001
-- offline-deps/gradle/gradle-8.6.tar.gz.part-002
+- offline-deps/gradle/gradle-8.14.3.tar.gz.part-000
+- offline-deps/gradle/gradle-8.14.3.tar.gz.part-001
+- offline-deps/gradle/gradle-8.14.3.tar.gz.part-002
 - offline-deps/gradle/gradle-cache.tar.gz.part-001
 - offline-deps/gradle/gradle-cache.tar.gz.part-002
 

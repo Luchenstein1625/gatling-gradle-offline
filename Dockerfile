@@ -5,22 +5,22 @@ FROM eclipse-temurin:17-jdk-jammy AS dependency-cache
 ENV GRADLE_USER_HOME=/opt/gradle-cache
 WORKDIR /workspace
 
-COPY offline-deps/gradle/gradle-8.6.tar.gz.part-* /tmp/
+COPY offline-deps/gradle/gradle-8.14.3.tar.gz.part-* /tmp/
 COPY offline-deps/gradle/gradle-cache.tar.gz.part-* /tmp/
 
 RUN mkdir -p /opt \
- && cat $(ls /tmp/gradle-8.6.tar.gz.part-* | sort) > /tmp/gradle-8.6.tar.gz \
+ && cat $(ls /tmp/gradle-8.14.3.tar.gz.part-* | sort) > /tmp/gradle-8.14.3.tar.gz \
  && cat $(ls /tmp/gradle-cache.tar.gz.part-* | sort) > /tmp/gradle-cache.tar.gz \
- && tar -xzf /tmp/gradle-8.6.tar.gz -C /opt \
+ && tar -xzf /tmp/gradle-8.14.3.tar.gz -C /opt \
  && tar -xzf /tmp/gradle-cache.tar.gz -C /opt \
- && rm -f /tmp/gradle-8.6.tar.gz /tmp/gradle-cache.tar.gz /tmp/*.part-*
+ && rm -f /tmp/gradle-8.14.3.tar.gz /tmp/gradle-cache.tar.gz /tmp/*.part-*
 
-ENV PATH="/opt/gradle/gradle-8.6/bin:${PATH}"
+ENV PATH="/opt/gradle/gradle-8.14.3/bin:${PATH}"
 
 FROM eclipse-temurin:17-jdk-jammy AS builder
 
 ENV GRADLE_USER_HOME=/opt/gradle-cache
-ENV PATH="/opt/gradle/gradle-8.6/bin:${PATH}"
+ENV PATH="/opt/gradle/gradle-8.14.3/bin:${PATH}"
 WORKDIR /workspace
 
 COPY --from=dependency-cache /opt/gradle /opt/gradle
@@ -39,11 +39,11 @@ RUN gradle -p /workspace/security-runner --no-daemon tasks --all
 FROM eclipse-temurin:17-jdk-jammy AS runtime
 
 ENV GRADLE_USER_HOME=/opt/gradle-cache \
-    PATH="/opt/gradle/gradle-8.6/bin:${PATH}" \
+    PATH="/opt/gradle/gradle-8.14.3/bin:${PATH}" \
     APP_DATA_ROOT=/app/data \
     RESULTS_DIR=/app/data/executions \
     PERFORMANCE_SIMULATIONS_DIR=/app/data/simulations \
-    GATLING_COMMAND=/opt/gradle/gradle-8.6/bin/gradle \
+    GATLING_COMMAND=/opt/gradle/gradle-8.14.3/bin/gradle \
     GATLING_PROJECT_DIR=/app/gatling-runner \
     SECURITY_PROJECT_DIR=/app/security-runner \
     SECURITY_SCAN_TARGET=/app/app.jar \

@@ -6,9 +6,8 @@ mkdir -p "$OUT_DIR"
 
 # Images required for fully offline compose builds in this repository.
 IMAGES=(
-  "eclipse-temurin:11-jdk-jammy"
-  "eclipse-temurin:11-jre-jammy"
-  "bcirg3crtrgandes01acr001.azurecr.io/gatling/gatling-gen3-docker-fast-api:secure"
+  "eclipse-temurin:17-jdk-jammy"
+  "aquasec/trivy:0.72.0"
 )
 
 MANIFEST_FILE="$OUT_DIR/manifest.txt"

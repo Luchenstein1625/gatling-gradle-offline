@@ -6,22 +6,14 @@ cd "$ROOT_DIR"
 
 BUNDLE_PATH="${1:-offline-image-bundle.tgz}"
 REQUIRED_IMAGES=(
-  "eclipse-temurin:11-jdk-jammy"
-  "eclipse-temurin:11-jre-jammy"
-)
-
-REQUIRED_FILES=(
-  "offline-deps/gradle/gradle-8.6.tar.gz.part-000"
-  "offline-deps/gradle/gradle-8.6.tar.gz.part-001"
-  "offline-deps/gradle/gradle-8.6.tar.gz.part-002"
-  "offline-deps/gradle/gradle-cache.tar.gz.part-001"
-  "offline-deps/gradle/gradle-cache.tar.gz.part-002"
+  "eclipse-temurin:17-jdk-jammy"
+  "aquasec/trivy:0.72.0"
 )
 
 missing_files=0
-for file in "${REQUIRED_FILES[@]}"; do
-  if [[ ! -f "$ROOT_DIR/$file" ]]; then
-    echo "Missing offline artifact: $file"
+for pattern in "gradle-8.14.3.tar.gz.part-*" "gradle-cache.tar.gz.part-*"; do
+  if ! compgen -G "$ROOT_DIR/offline-deps/gradle/$pattern" >/dev/null; then
+    echo "Missing offline artifact: offline-deps/gradle/$pattern"
     ((missing_files+=1))
   fi
 done

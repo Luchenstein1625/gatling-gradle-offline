@@ -33,6 +33,8 @@ public class SecurityScanService {
     private final ObjectMapper objectMapper;
     private final String gradleCommand;
     private final String trivyCommand;
+    private final Path scanTarget;
+    private final Path trivyCacheDir;
     private final Path projectDir;
     private final Path reportDir;
     private final Path logFile;
@@ -47,14 +49,18 @@ public class SecurityScanService {
 
     public SecurityScanService(
             ObjectMapper objectMapper,
-            @Value("${security.scan.gradle-command:${SECURITY_GRADLE_COMMAND:/opt/gradle/gradle-8.6/bin/gradle}}") String gradleCommand,
+            @Value("${security.scan.gradle-command:${SECURITY_GRADLE_COMMAND:/opt/gradle/gradle-8.14.3/bin/gradle}}") String gradleCommand,
             @Value("${security.scan.trivy-command:${TRIVY_COMMAND:/usr/local/bin/trivy}}") String trivyCommand,
+            @Value("${security.scan.target:${SECURITY_SCAN_TARGET:/app/app.jar}}") String scanTarget,
+            @Value("${security.scan.trivy-cache-dir:${TRIVY_CACHE_DIR:/app/data/security/trivy-cache}}") String trivyCacheDir,
             @Value("${security.scan.project-dir:${SECURITY_PROJECT_DIR:/app/security-runner}}") String projectDir,
             @Value("${security.scan.report-dir:${SECURITY_REPORT_DIR:/app/data/security/reports}}") String reportDir
     ) throws IOException {
         this.objectMapper = objectMapper;
         this.gradleCommand = gradleCommand;
         this.trivyCommand = trivyCommand;
+        this.scanTarget = Path.of(scanTarget).toAbsolutePath().normalize();
+        this.trivyCacheDir = Path.of(trivyCacheDir).toAbsolutePath().normalize();
         this.projectDir = Path.of(projectDir).toAbsolutePath().normalize();
         this.reportDir = Path.of(reportDir).toAbsolutePath().normalize();
         this.logFile = this.reportDir.resolve("security-scan.log");
@@ -77,6 +83,9 @@ public class SecurityScanService {
         if (!Files.isExecutable(Path.of(trivyCommand))) {
             throw new IllegalStateException("No existe el ejecutable Trivy: " + trivyCommand);
         }
+        if (!Files.isRegularFile(scanTarget)) {
+            throw new IllegalStateException("No existe el artefacto que se debe analizar: " + scanTarget);
+        }
         status = "QUEUED";
         startedAt = Instant.now();
         finishedAt = null;
@@ -88,6 +97,7 @@ public class SecurityScanService {
     }
 
     private void run() {
+        Path unpackedJar = null;
         status = "RUNNING";
         try {
             Files.createDirectories(reportDir);
@@ -100,18 +110,33 @@ public class SecurityScanService {
                     "dependencyCheckAnalyze"
             ), projectDir, "OWASP");
 
-            appendLog("[TRIVY] Iniciando análisis del filesystem, sistema operativo y dependencias de analizadores");
+            Files.createDirectories(trivyCacheDir);
+            unpackedJar = Files.createTempDirectory("app-jar-scan-");
+            appendLog("[TRIVY] Extrayendo app.jar para analizar BOOT-INF/lib");
+            int extractExitCode = execute(List.of(
+                    "jar", "-xf", scanTarget.toString()
+            ), unpackedJar, "TRIVY-EXTRACT");
+            if (extractExitCode != 0) {
+                throw new IOException("No fue posible extraer app.jar; código: " + extractExitCode);
+            }
+            appendLog("[TRIVY] Iniciando análisis del JAR extraído: " + unpackedJar);
             trivyExitCode = execute(List.of(
-                    trivyCommand, "rootfs", "--scanners", "vuln", "--severity", "CRITICAL,HIGH,MEDIUM",
+                    trivyCommand, "fs", "--scanners", "vuln", "--severity", "CRITICAL,HIGH,MEDIUM",
+                    "--exit-code", "1", "--cache-dir", trivyCacheDir.toString(),
+                    "--offline-scan", "--skip-db-update", "--skip-java-db-update",
                     "--format", "json", "--output", trivyReport().toString(),
-                    "--skip-dirs", "/proc", "--skip-dirs", "/sys", "--skip-dirs", "/dev",
-                    "--skip-dirs", "/app/data", "/"
+                    unpackedJar.toString()
             ), projectDir, "TRIVY");
 
-            boolean owaspOk = owaspExitCode == 0 && Files.isRegularFile(jsonReport());
-            boolean trivyOk = trivyExitCode == 0 && Files.isRegularFile(trivyReport());
-            exitCode = owaspOk && trivyOk ? 0 : 1;
-            status = owaspOk && trivyOk ? "COMPLETED" : (owaspOk || trivyOk ? "PARTIAL" : "FAILED");
+            boolean owaspReportCreated = Files.isRegularFile(jsonReport());
+            boolean trivyReportCreated = Files.isRegularFile(trivyReport());
+            boolean reportsComplete = owaspReportCreated && trivyReportCreated;
+            boolean findingsDetected = (owaspExitCode != null && owaspExitCode != 0)
+                    || (trivyExitCode != null && trivyExitCode != 0);
+            exitCode = reportsComplete && !findingsDetected ? 0 : 1;
+            status = reportsComplete
+                    ? (findingsDetected ? "COMPLETED_WITH_FINDINGS" : "COMPLETED")
+                    : (owaspReportCreated || trivyReportCreated ? "PARTIAL" : "FAILED");
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
             exitCode = -1;
@@ -127,7 +152,28 @@ public class SecurityScanService {
             }
         } finally {
             process = null;
+            if (unpackedJar != null) {
+                try {
+                    deleteRecursively(unpackedJar);
+                } catch (IOException cleanupError) {
+                    try {
+                        appendLog("[SECURITY] AVISO: no se pudo limpiar el temporal de Trivy: "
+                                + cleanupError.getMessage());
+                    } catch (IOException ignored) {
+                        // El resultado del análisis no cambia por un fallo de limpieza temporal.
+                    }
+                }
+            }
             finishedAt = Instant.now();
+        }
+    }
+
+    private void deleteRecursively(Path root) throws IOException {
+        if (!Files.exists(root)) return;
+        try (var paths = Files.walk(root)) {
+            for (Path path : paths.sorted(Comparator.reverseOrder()).collect(Collectors.toList())) {
+                Files.deleteIfExists(path);
+            }
         }
     }
 
@@ -159,6 +205,7 @@ public class SecurityScanService {
         result.put("exit_code", exitCode);
         result.put("owasp_exit_code", owaspExitCode);
         result.put("trivy_exit_code", trivyExitCode);
+        result.put("scan_target", scanTarget.toString());
         result.put("owasp_report_available", Files.isRegularFile(jsonReport()));
         result.put("trivy_report_available", Files.isRegularFile(trivyReport()));
         result.put("report_available", Files.isRegularFile(jsonReport()) || Files.isRegularFile(trivyReport()));

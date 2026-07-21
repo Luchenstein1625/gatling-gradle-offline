@@ -63,11 +63,11 @@ spec:
         - name: PERFORMANCE_SIMULATIONS_DIR
           value: "/app/data/simulations"
         - name: GATLING_COMMAND
-          value: "/opt/gradle/gradle-8.6/bin/gradle"
+          value: "/opt/gradle/gradle-8.14.3/bin/gradle"
         - name: GATLING_PROJECT_DIR
           value: "/app/gatling-runner"
         - name: SECURITY_GRADLE_COMMAND
-          value: "/opt/gradle/gradle-8.6/bin/gradle"
+          value: "/opt/gradle/gradle-8.14.3/bin/gradle"
         - name: SECURITY_PROJECT_DIR
           value: "/app/security-runner"
         - name: SECURITY_SCAN_TARGET
@@ -94,6 +94,14 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 30
           timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /gatling/gatling-gen3-app/v0.1/health
+            port: 8080
+            scheme: HTTP
+          periodSeconds: 10
+          timeoutSeconds: 2
           failureThreshold: 3
         startupProbe:
           httpGet:

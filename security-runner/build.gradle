@@ -15,9 +15,18 @@ dependencyCheck {
     if (nvdKey != null && !nvdKey.trim().isEmpty()) {
         nvd.apiKey = nvdKey
     }
-    failBuildOnCVSS = 11.0
+    // Detiene el control cuando OWASP detecta vulnerabilidades altas o críticas.
+    failBuildOnCVSS = 7.0
     failOnError = true
     analyzers {
         assemblyEnabled = false
+    }
+}
+
+tasks.named('dependencyCheckAnalyze') {
+    doFirst {
+        if (!new File(scanTarget).isFile()) {
+            throw new GradleException("No existe SECURITY_SCAN_TARGET: ${scanTarget}")
+        }
     }
 }

@@ -1,0 +1,31 @@
+FROM eclipse-temurin:17-jdk-jammy
+
+ARG GRADLE_VERSION=8.14.3
+ENV GRADLE_USER_HOME=/opt/gradle-cache \
+    PATH=/opt/gradle/gradle-8.14.3/bin:${PATH}
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends curl unzip ca-certificates \
+ && rm -rf /var/lib/apt/lists/* \
+ && mkdir -p /opt/gradle /opt/gradle-cache \
+ && curl -fsSL "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -o /tmp/gradle.zip \
+ && unzip -q /tmp/gradle.zip -d /opt/gradle \
+ && rm -f /tmp/gradle.zip
+
+WORKDIR /workspace
+COPY app/ ./app/
+COPY gatling-runner/ ./gatling-runner/
+COPY security-runner/ ./security-runner/
+
+# Resuelve solamente lo necesario para construir y analizar el proyecto actual.
+RUN gradle -p app --no-daemon clean test bootJar verifySecurityDependencyVersions \
+ && gradle -p gatling-runner --no-daemon dependencies --configuration gatlingRuntimeClasspath \
+ && gradle -p security-runner --no-daemon tasks --all \
+ && rm -rf /opt/gradle-cache/caches/*/fileHashes \
+            /opt/gradle-cache/caches/*/fileContent \
+            /opt/gradle-cache/caches/*/executionHistory \
+            /opt/gradle-cache/caches/*/generated-gradle-jars \
+            /opt/gradle-cache/daemon \
+            /opt/gradle-cache/notifications \
+            /opt/gradle-cache/workers
+
