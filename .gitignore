@@ -31,3 +31,6 @@ dependency-check-report.*
 !offline-deps/**
 
 data/security/database/odc.mv.db
+
+data/security/database/
+data/executions/
