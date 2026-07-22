@@ -264,7 +264,10 @@ public class PerformanceExecutionService {
         record.status = "RUNNING";
         record.startedAt = Instant.now();
         appendLog(record.logFile, "[CONTROL] Iniciando " + record.simulationClass);
-
+        appendLog(
+                record.logFile,
+                "[CONTROL] Vault " + secretKeyName + ": " + maskSecret(vaultSecret)
+        );
         Path commandPath = Path.of(gatlingCommand);
         if (!Files.isExecutable(commandPath)) {
             markFailed(record, -1, "No existe el ejecutable Gradle en " + gatlingCommand, null, vaultSecret);
@@ -449,6 +452,20 @@ public class PerformanceExecutionService {
             response.put("error", ex.getMessage());
             return response;
         }
+    }
+
+    private String maskSecret(String value) {
+        if (value == null || value.isBlank()) {
+            return "[NO DISPONIBLE]";
+        }
+
+        if (value.length() <= 2) {
+            return "*".repeat(value.length());
+        }
+
+        return value.charAt(0)
+                + "*".repeat(Math.min(value.length() - 2, 10))
+                + value.charAt(value.length() - 1);
     }
 
     public Map<String, Object> runtimeInfo() {
