@@ -5,7 +5,7 @@ import io.gatling.http.Predef._
 import scala.concurrent.duration._
 import java.util.UUID
 
-class BciLoginBusinessSmokeSimulation extends Simulation {
+class BciLoginSmokeSimulation extends Simulation {
 
   // --- VARIABLES DE ENTORNO ---
   private val loginUrl = sys.env.getOrElse("BCI_LOGIN_URL", "https://bci-api-crt001.internal.bci.cl/operaciones/seguridad-y-acceso/ms-loginclientes-util/v1.4/oauth/token")

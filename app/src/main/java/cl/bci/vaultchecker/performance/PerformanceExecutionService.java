@@ -288,9 +288,6 @@ public class PerformanceExecutionService {
         ProcessBuilder processBuilder = new ProcessBuilder(command);
         processBuilder.redirectErrorStream(true);
         processBuilder.directory(gatlingProjectDir.toFile());
-        if (vaultSecret != null && !vaultSecret.isBlank()) {
-            processBuilder.environment().put("BCI_LOGIN_BASIC_AUTH", vaultSecret);
-        }
         processBuilder.environment().put("PERFORMANCE_SIMULATIONS_DIR", simulationsRoot.toString());
 
         try {

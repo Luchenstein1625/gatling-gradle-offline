@@ -70,9 +70,6 @@ public class SimulationValidationService {
         if (!source.contains("io.gatling.http.Predef")) {
             warnings.add("No se encontró io.gatling.http.Predef._; confirmar si la simulación usa HTTP.");
         }
-        if (!source.contains("BCI_LOGIN_BASIC_AUTH")) {
-            errors.add("La simulación debe obtener el token desde BCI_LOGIN_BASIC_AUTH.");
-        }
         if (source.contains("println(s\"access_token:")) {
             errors.add("No se permite imprimir el access_token completo en los logs.");
         }

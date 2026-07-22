@@ -44,8 +44,7 @@ ENV GRADLE_USER_HOME=/opt/gradle-cache \
     SECURITY_SCAN_ENABLED=false \
     API_PREFIX=/gatling/gatling-gen3-app/v0.1 \
     SERVER_SERVLET_CONTEXT_PATH=/gatling/gatling-gen3-app/v0.1 \
-    HOME=/home/gatling \
-    JAVA_TOOL_OPTIONS="-XX:+UseG1GC -Xms32m -Xmx384m -XX:MaxMetaspaceSize=192m"
+    HOME=/home/gatling 
 
 RUN groupadd -g 1001 gatling && useradd -u 1001 -g gatling -m -d /home/gatling gatling
 WORKDIR /app
