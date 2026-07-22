@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Gatling Control Center</title>
+    <style>
+        :root { color-scheme: dark; --bg:#07111f; --panel:#101d30; --line:#243653; --text:#e8f0fb; --muted:#8da2bf; --blue:#38bdf8; --green:#34d399; }
+        * { box-sizing:border-box; }
+        body { margin:0; min-height:100vh; font-family:Inter,"Segoe UI",sans-serif; color:var(--text); background:radial-gradient(circle at 15% 10%,#12345a 0,transparent 32%),radial-gradient(circle at 90% 90%,#123a36 0,transparent 28%),var(--bg); }
+        .shell { width:min(1120px,calc(100% - 32px)); margin:auto; padding:48px 0; }
+        header { display:flex; justify-content:space-between; align-items:center; gap:20px; margin-bottom:48px; }
+        .eyebrow { color:var(--blue); letter-spacing:.16em; text-transform:uppercase; font-size:.75rem; font-weight:800; }
+        h1 { margin:8px 0; font-size:clamp(2rem,5vw,3.4rem); line-height:1; }
+        .subtitle { color:var(--muted); margin:0; max-width:680px; }
+        .environment { padding:9px 14px; border:1px solid var(--line); border-radius:999px; background:rgba(16,29,48,.75); color:var(--muted); white-space:nowrap; }
+        .grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
+        .module { position:relative; min-height:330px; display:flex; flex-direction:column; padding:30px; border:1px solid var(--line); border-radius:24px; background:linear-gradient(145deg,rgba(20,37,61,.94),rgba(11,23,40,.94)); box-shadow:0 24px 70px rgba(0,0,0,.28); overflow:hidden; transition:transform .2s,border-color .2s; }
+        .module:hover { transform:translateY(-4px); border-color:#43658d; }
+        .module::after { content:""; position:absolute; width:180px; height:180px; border-radius:50%; right:-70px; top:-70px; background:var(--accent); opacity:.09; }
+        .icon { width:54px; height:54px; display:grid; place-items:center; border-radius:16px; background:color-mix(in srgb,var(--accent) 16%,transparent); border:1px solid color-mix(in srgb,var(--accent) 40%,transparent); font-size:1.45rem; }
+        h2 { margin:24px 0 10px; font-size:1.55rem; }
+        .module p { color:var(--muted); line-height:1.6; margin:0; }
+        .features { list-style:none; padding:0; margin:22px 0 28px; color:#c7d4e7; }
+        .features li { margin:10px 0; }
+        .features li::before { content:"✓"; color:var(--accent); font-weight:900; margin-right:10px; }
+        .action { margin-top:auto; display:flex; justify-content:space-between; align-items:center; padding:13px 16px; border-radius:12px; text-decoration:none; color:#06101d; font-weight:800; background:var(--accent); }
+        footer { margin-top:30px; color:var(--muted); font-size:.82rem; text-align:center; }
+        @media(max-width:760px){ header{align-items:flex-start;flex-direction:column}.grid{grid-template-columns:1fr}.shell{padding-top:30px} }
+    </style>
+</head>
+<body>
+<main class="shell">
+    <header>
+        <div>
+            <div class="eyebrow">I+DevOps · Performance Engineering</div>
+            <h1>Gatling Control Center</h1>
+            <p class="subtitle">Centro de operación para validar la integración con Vault y administrar pruebas de rendimiento.</p>
+        </div>
+        <div class="environment">Ambiente: <strong th:text="${profile}">qa</strong></div>
+    </header>
+
+    <section class="grid" aria-label="Módulos principales">
+        <article class="module" style="--accent:var(--blue)">
+            <div class="icon">🔐</div>
+            <h2>Diagnóstico Vault</h2>
+            <p>Comprueba conectividad, certificados, AppRole, versión KV y lectura segura de secretos.</p>
+            <ul class="features">
+                <li>Precheck de infraestructura</li>
+                <li>Lectura enmascarada</li>
+                <li>Alertas y eventos</li>
+            </ul>
+            <a class="action" th:href="@{/dashboard}"><span>Abrir Vault</span><span>→</span></a>
+        </article>
+
+        <article class="module" style="--accent:var(--green)">
+            <div class="icon">⚡</div>
+            <h2>Pruebas de rendimiento</h2>
+            <p>Prepara la configuración de una ejecución Gatling y visualiza el flujo que incorporaremos al backend.</p>
+            <ul class="features">
+                <li>Configuración de prueba</li>
+                <li>Ejecución y seguimiento</li>
+                <li>Logs, resultados y reporte</li>
+            </ul>
+            <a class="action" th:href="@{/performance}"><span>Abrir ejecuciones</span><span>→</span></a>
+        </article>
+
+        <article class="module" style="--accent:#fb7185">
+            <div class="icon">🛡️</div>
+            <h2>Seguridad</h2>
+            <p>Analiza componentes del proyecto contra vulnerabilidades públicas conocidas.</p>
+            <ul class="features">
+                <li>OWASP Dependency-Check</li>
+                <li>Críticas, altas y medias</li>
+                <li>Reporte JSON y HTML</li>
+            </ul>
+            <a class="action" th:href="@{/security}"><span>Abrir análisis</span><span>→</span></a>
+        </article>
+    </section>
+
+    <footer><span th:text="${appName}">gatling-gen3-app</span> · <span th:text="${buildDisplayVersion}">dev</span></footer>
+</main>
+</body>
+</html>

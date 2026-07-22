@@ -166,7 +166,7 @@
                                 <div class="flow-detail">Role ID + Secret ID obtienen una sesión temporal.</div><span class="flow-status">PENDIENTE</span>
                             </article>
                             <article id="flowKv" class="flow-step">
-                                <div class="flow-number">4</div><div class="flow-title">Lectura KV</div>
+                                <div class="flow-number">4</div><div class="flow-title">Lectura de secreto</div>
                                 <div class="flow-detail"><span th:text="${vaultBackend}">secret</span>/<span th:text="${vaultKvApplicationName}">token_pruebas</span>/<span th:text="${vaultKvProfiles}">qa</span></div><span class="flow-status">PENDIENTE</span>
                             </article>
                             <article id="flowSpring" class="flow-step">
@@ -212,7 +212,7 @@
                                 <tr><td class="text-muted">Vault Host:</td><td class="font-monospace text-info" th:text="${vaultHost}">-</td></tr>
                                 <tr><td class="text-muted">Vault Port:</td><td class="font-monospace" th:text="${vaultPort}">-</td></tr>
                                 <tr><td class="text-muted">Método de Auth:</td><td class="badge bg-secondary text-uppercase mt-1" th:text="${vaultAuth}">-</td></tr>
-                                <tr><td class="text-muted">Backend KV:</td><td class="font-monospace text-info" th:text="${vaultBackend}">secret</td></tr>
+                                <tr><td class="text-muted">Backend de secretos:</td><td class="font-monospace text-info" th:text="${vaultBackend}">secret</td></tr>
                                 <tr><td class="text-muted">Application Name:</td><td class="font-monospace text-info" th:text="${vaultKvApplicationName}">token_pruebas</td></tr>
                                 <tr><td class="text-muted">Profiles:</td><td class="font-monospace text-info" th:text="${vaultKvProfiles}">qa</td></tr>
                                 <tr><td class="text-muted">Ruta TrustStore:</td><td class="small font-monospace text-warning" th:text="${trustStore}">-</td></tr>

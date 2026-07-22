@@ -38,12 +38,12 @@ spring:
 performance:
   simulations-dir: ${PERFORMANCE_SIMULATIONS_DIR:/app/data/simulations}
   executions-dir: ${RESULTS_DIR:/app/data/executions}
-  gatling-command: ${GATLING_COMMAND:/opt/gradle/gradle-8.14.3/bin/gradle}
+  gatling-command: ${GATLING_COMMAND:/opt/gradle/bin/gradle}
   gatling-project-dir: ${GATLING_PROJECT_DIR:/app/gatling-runner}
 
 security:
   scan:
-    gradle-command: ${SECURITY_GRADLE_COMMAND:/opt/gradle/gradle-8.14.3/bin/gradle}
+    gradle-command: ${SECURITY_GRADLE_COMMAND:/opt/gradle/bin/gradle}
     project-dir: ${SECURITY_PROJECT_DIR:/app/security-runner}
     report-dir: ${SECURITY_REPORT_DIR:/app/data/security/reports}
     trivy-command: ${TRIVY_COMMAND:/usr/local/bin/trivy}

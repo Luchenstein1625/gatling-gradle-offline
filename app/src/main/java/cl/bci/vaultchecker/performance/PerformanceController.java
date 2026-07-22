@@ -17,6 +17,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.time.Instant;
 
 @RestController
 @RequestMapping("/api/performance")
@@ -59,6 +60,11 @@ public class PerformanceController {
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.listExecutions());
     }
 
+    @GetMapping("/executions/latest")
+    public ResponseEntity<Map<String, Object>> latestExecutionLog() {
+        return noStore(service.latestExecutionLog());
+    }
+
     @GetMapping("/executions/{id}")
     public ResponseEntity<Map<String, Object>> status(@PathVariable String id) {
         return noStore(service.status(id));
@@ -68,10 +74,21 @@ public class PerformanceController {
     public ResponseEntity<Map<String, Object>> logs(@PathVariable String id,
                                                      @RequestParam(defaultValue = "0") long offset) throws Exception {
         String content = service.logs(id, offset);
+        Map<String, Object> status = service.status(id);
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("content", content);
         response.put("next_offset", service.logSize(id));
+        response.put("execution_id", id);
+        response.put("status", status.get("status"));
+        response.put("error_type", status.get("error_type"));
+        response.put("error_summary", status.get("error_summary"));
+        response.put("error_at", status.get("error_at"));
         return noStore(response);
+    }
+
+    @PostMapping("/executions/{id}/cancel")
+    public ResponseEntity<Map<String, Object>> cancel(@PathVariable String id) {
+        return noStore(service.cancel(id));
     }
 
     @GetMapping("/executions/{id}/results")
@@ -89,7 +106,26 @@ public class PerformanceController {
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("status", "ERROR");
         response.put("message", ex.getMessage());
+        response.put("error_type", ex.getClass().getSimpleName());
+        response.put("timestamp", Instant.now().toString());
+        response.put("hint", resolveHint(ex.getMessage()));
         return ResponseEntity.badRequest().cacheControl(CacheControl.noStore()).body(response);
+    }
+
+    private String resolveHint(String message) {
+        if (message == null || message.isBlank()) {
+            return "Revisa los logs del backend y vuelve a intentar.";
+        }
+        if (message.contains("Ejecución no encontrada")) {
+            return "El pod pudo reiniciarse. Consulta /api/performance/executions/latest para recuperar el último log persistido.";
+        }
+        if (message.contains("Ya existe una ejecución activa")) {
+            return "Adjúntate a la ejecución activa desde /api/performance/executions o espera su finalización.";
+        }
+        if (message.contains("Clase de simulación inválida")) {
+            return "Verifica que la clase cumpla el patrón bci.cards.simulation.NombreClase.";
+        }
+        return "Revisa execution.log y estado de /api/performance/runtime para más detalle.";
     }
 
     private ResponseEntity<Map<String, Object>> noStore(Map<String, Object> body) {

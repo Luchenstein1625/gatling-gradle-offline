@@ -49,7 +49,7 @@ public class SecurityScanService {
 
     public SecurityScanService(
             ObjectMapper objectMapper,
-            @Value("${security.scan.gradle-command:${SECURITY_GRADLE_COMMAND:/opt/gradle/gradle-8.14.3/bin/gradle}}") String gradleCommand,
+            @Value("${security.scan.gradle-command:${SECURITY_GRADLE_COMMAND:/opt/gradle/bin/gradle}}") String gradleCommand,
             @Value("${security.scan.trivy-command:${TRIVY_COMMAND:/usr/local/bin/trivy}}") String trivyCommand,
             @Value("${security.scan.target:${SECURITY_SCAN_TARGET:/app/app.jar}}") String scanTarget,
             @Value("${security.scan.trivy-cache-dir:${TRIVY_CACHE_DIR:/app/data/security/trivy-cache}}") String trivyCacheDir,

@@ -16,16 +16,22 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.StandardOpenOption;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -40,15 +46,21 @@ public class PerformanceExecutionService {
     private final String gatlingCommand;
     private final Path gatlingProjectDir;
     private final String secretKeyName;
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private static final AtomicInteger WORKER_SEQUENCE = new AtomicInteger(0);
+    private final ExecutorService executor = Executors.newCachedThreadPool(runnable -> {
+        Thread thread = new Thread(runnable, "performance-exec-" + WORKER_SEQUENCE.incrementAndGet());
+        thread.setDaemon(true);
+        return thread;
+    });
     private final Map<String, ExecutionRecord> executions = new ConcurrentHashMap<>();
+    private static final Duration QUEUED_STALE_TIMEOUT = Duration.ofMinutes(5);
 
     public PerformanceExecutionService(
             SimulationValidationService validationService,
             Environment environment,
             @Value("${performance.simulations-dir:${PERFORMANCE_SIMULATIONS_DIR:/app/data/simulations}}") String simulationsDir,
             @Value("${performance.executions-dir:${RESULTS_DIR:/app/data/executions}}") String executionsDir,
-            @Value("${performance.gatling-command:${GATLING_COMMAND:/opt/gradle/gradle-8.14.3/bin/gradle}}") String gatlingCommand,
+                @Value("${performance.gatling-command:${GATLING_COMMAND:/opt/gradle/bin/gradle}}") String gatlingCommand,
             @Value("${performance.gatling-project-dir:${GATLING_PROJECT_DIR:/app/gatling-runner}}") String gatlingProjectDir,
             @Value("${VAULT_SECRET_KEY_NAME:token}") String secretKeyName
     ) throws IOException {
@@ -126,10 +138,11 @@ public class PerformanceExecutionService {
 
     public synchronized Map<String, Object> start(String fullyQualifiedClassName) throws IOException {
         validateClassName(fullyQualifiedClassName);
-        boolean running = executions.values().stream().anyMatch(record -> "RUNNING".equals(record.status)
-                || "QUEUED".equals(record.status));
-        if (running) {
-            throw new IllegalStateException("Ya existe una ejecución activa; espera a que finalice.");
+        markStaleExecutionsAsFailed();
+        ExecutionRecord activeExecution = findActiveExecution();
+        if (activeExecution != null) {
+            throw new IllegalStateException("Ya existe una ejecución activa (" + activeExecution.id
+                    + ") para " + activeExecution.simulationClass + "; espera a que finalice.");
         }
 
         Path source = simulationsRoot.resolve(fullyQualifiedClassName.replace('.', '/') + ".scala").normalize();
@@ -139,9 +152,6 @@ public class PerformanceExecutionService {
         }
 
         String vaultSecret = environment.getProperty(secretKeyName);
-        if (vaultSecret == null || vaultSecret.isBlank()) {
-            throw new IllegalStateException("Vault no cargó la clave configurada: " + secretKeyName);
-        }
 
         String executionId = Instant.now().toString().replace(':', '-') + "-" + UUID.randomUUID().toString().substring(0, 8);
         Path executionDirectory = executionsRoot.resolve(executionId).normalize();
@@ -153,7 +163,100 @@ public class PerformanceExecutionService {
 
         ExecutionRecord record = new ExecutionRecord(executionId, fullyQualifiedClassName, executionDirectory, logFile);
         executions.put(executionId, record);
-        executor.submit(() -> run(record, resultsDirectory, vaultSecret));
+        appendLog(record.logFile, "[CONTROL] id=" + record.id + " host=" + runtimeHostName() + " created_at=" + record.createdAt);
+        appendLog(record.logFile, "[CONTROL] Ejecución en cola para " + record.simulationClass);
+        try {
+            executor.submit(() -> run(record, resultsDirectory, vaultSecret));
+        } catch (RejectedExecutionException ex) {
+            markFailed(record, -1, "No se pudo iniciar la ejecución en el pool de workers.", ex, vaultSecret);
+        }
+        return record.snapshot();
+    }
+
+    private ExecutionRecord findActiveExecution() {
+        return executions.values().stream()
+                .filter(record -> "RUNNING".equals(record.status) || "QUEUED".equals(record.status))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private void markStaleExecutionsAsFailed() {
+        Instant now = Instant.now();
+        for (ExecutionRecord record : executions.values()) {
+            Process process = record.process;
+
+            // Estados terminales no deben mantener procesos vivos; limpialos si quedaron zombies.
+            if (!"RUNNING".equals(record.status) && !"QUEUED".equals(record.status)) {
+                if (process != null && process.isAlive()) {
+                    process.destroy();
+                    try {
+                        if (!process.waitFor(2, TimeUnit.SECONDS) && process.isAlive()) {
+                            process.destroyForcibly();
+                        }
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                if (process != null && !process.isAlive()) {
+                    record.process = null;
+                }
+                continue;
+            }
+
+            if (process != null && process.isAlive()) {
+                continue;
+            }
+
+            // Ventana normal de arranque sin proceso aún asignado.
+            if (process == null) {
+                if ("QUEUED".equals(record.status)) {
+                    Duration queuedAge = Duration.between(record.createdAt, now);
+                    if (queuedAge.compareTo(QUEUED_STALE_TIMEOUT) < 0) {
+                        continue;
+                    }
+                }
+                if ("RUNNING".equals(record.status)) {
+                    Instant runningSince = record.startedAt != null ? record.startedAt : record.createdAt;
+                    Duration runningAge = Duration.between(runningSince, now);
+                    if (runningAge.compareTo(QUEUED_STALE_TIMEOUT) < 0) {
+                        continue;
+                    }
+                }
+            }
+
+            if (record.finishedAt == null) {
+                markFailed(record, -1, "Ejecución previa quedó sin proceso activo.", null, null);
+            }
+        }
+    }
+
+    public synchronized Map<String, Object> cancel(String executionId) {
+        markStaleExecutionsAsFailed();
+        ExecutionRecord record = requireExecution(executionId);
+        if (!"RUNNING".equals(record.status) && !"QUEUED".equals(record.status)) {
+            return record.snapshot();
+        }
+
+        Process process = record.process;
+        if (process != null && process.isAlive()) {
+            process.destroy();
+            try {
+                if (!process.waitFor(2, TimeUnit.SECONDS) && process.isAlive()) {
+                    process.destroyForcibly();
+                }
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        record.status = "FAILED";
+        record.exitCode = -1;
+        record.finishedAt = Instant.now();
+        record.lastErrorType = "MANUAL_CANCEL";
+        record.lastErrorSummary = "Ejecución cancelada manualmente por un operador.";
+        record.lastErrorAt = Instant.now();
+        record.process = null;
+        appendLog(record.logFile, "[CONTROL] Ejecución cancelada manualmente.");
         return record.snapshot();
     }
 
@@ -164,17 +267,11 @@ public class PerformanceExecutionService {
 
         Path commandPath = Path.of(gatlingCommand);
         if (!Files.isExecutable(commandPath)) {
-            record.status = "FAILED";
-            record.finishedAt = Instant.now();
-            record.exitCode = -1;
-            appendLog(record.logFile, "[CONTROL] ERROR: no existe el ejecutable Gradle en " + gatlingCommand);
+            markFailed(record, -1, "No existe el ejecutable Gradle en " + gatlingCommand, null, vaultSecret);
             return;
         }
         if (!Files.isDirectory(gatlingProjectDir) || !Files.isRegularFile(gatlingProjectDir.resolve("build.gradle"))) {
-            record.status = "FAILED";
-            record.finishedAt = Instant.now();
-            record.exitCode = -1;
-            appendLog(record.logFile, "[CONTROL] ERROR: no existe el proyecto runner en " + gatlingProjectDir);
+            markFailed(record, -1, "No existe el proyecto runner en " + gatlingProjectDir, null, vaultSecret);
             return;
         }
 
@@ -191,7 +288,9 @@ public class PerformanceExecutionService {
         ProcessBuilder processBuilder = new ProcessBuilder(command);
         processBuilder.redirectErrorStream(true);
         processBuilder.directory(gatlingProjectDir.toFile());
-        processBuilder.environment().put("BCI_LOGIN_BASIC_AUTH", vaultSecret);
+        if (vaultSecret != null && !vaultSecret.isBlank()) {
+            processBuilder.environment().put("BCI_LOGIN_BASIC_AUTH", vaultSecret);
+        }
         processBuilder.environment().put("PERFORMANCE_SIMULATIONS_DIR", simulationsRoot.toString());
 
         try {
@@ -209,16 +308,17 @@ public class PerformanceExecutionService {
             record.status = exitCode == 0 ? "SUCCEEDED" : "FAILED";
             if (exitCode == 0) {
                 collectGeneratedReport(record, resultsDirectory);
+            } else {
+                record.lastErrorType = "GATLING_EXIT_CODE";
+                record.lastErrorSummary = "Gatling/Gradle terminó con exit code " + exitCode + ". Revisa execution.log para el detalle.";
+                record.lastErrorAt = Instant.now();
+                appendLog(record.logFile, "[CONTROL] ERROR: ejecución finalizó con exit code " + exitCode);
             }
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
-            record.exitCode = -1;
-            record.status = "FAILED";
-            appendLog(record.logFile, "[CONTROL] Ejecución interrumpida.");
-        } catch (Exception ex) {
-            record.exitCode = -1;
-            record.status = "FAILED";
-            appendLog(record.logFile, "[CONTROL] ERROR: " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+            markFailed(record, -1, "Ejecución interrumpida.", ex, vaultSecret);
+        } catch (Throwable ex) {
+            markFailed(record, -1, "Error inesperado durante la ejecución.", ex, vaultSecret);
         } finally {
             record.finishedAt = Instant.now();
             record.process = null;
@@ -286,14 +386,72 @@ public class PerformanceExecutionService {
     }
 
     public Map<String, Object> status(String executionId) {
+        markStaleExecutionsAsFailed();
         return requireExecution(executionId).snapshot();
     }
 
     public List<Map<String, Object>> listExecutions() {
+        markStaleExecutionsAsFailed();
         return executions.values().stream()
                 .sorted(Comparator.comparing((ExecutionRecord record) -> record.createdAt).reversed())
                 .map(ExecutionRecord::snapshot)
                 .collect(Collectors.toList());
+    }
+
+    public Map<String, Object> latestExecutionLog() {
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("found", false);
+
+        if (!Files.isDirectory(executionsRoot)) {
+            return response;
+        }
+
+        try (var paths = Files.list(executionsRoot)) {
+            Optional<Path> latestLog = paths
+                    .filter(Files::isDirectory)
+                    .map(dir -> dir.resolve("execution.log"))
+                    .filter(Files::isRegularFile)
+                    .max(Comparator.comparing(path -> {
+                        try {
+                            return Files.getLastModifiedTime(path).toInstant();
+                        } catch (IOException ex) {
+                            return Instant.EPOCH;
+                        }
+                    }));
+
+            if (latestLog.isEmpty()) {
+                return response;
+            }
+
+            Path logPath = latestLog.get();
+            Path executionDir = logPath.getParent();
+            String executionId = executionDir == null ? "desconocido" : executionDir.getFileName().toString();
+            String content = Files.readString(logPath, StandardCharsets.UTF_8);
+
+            String simulationClass = "desconocida";
+            String status = "UNKNOWN";
+
+            for (String line : content.split("\\R")) {
+                if (line.startsWith("[CONTROL] Iniciando ")) {
+                    simulationClass = line.substring("[CONTROL] Iniciando ".length()).trim();
+                }
+                if (line.startsWith("[CONTROL] Estado final: ")) {
+                    status = line.substring("[CONTROL] Estado final: ".length()).trim();
+                }
+            }
+
+            response.put("found", true);
+            response.put("id", executionId);
+            response.put("simulation_class", simulationClass);
+            response.put("status", status);
+            response.put("content", content);
+            response.put("process_alive", false);
+            response.put("download_ready", "SUCCEEDED".equals(status) || "FAILED".equals(status));
+            return response;
+        } catch (IOException ex) {
+            response.put("error", ex.getMessage());
+            return response;
+        }
     }
 
     public Map<String, Object> runtimeInfo() {
@@ -309,6 +467,7 @@ public class PerformanceExecutionService {
         boolean vaultEnabled = Boolean.parseBoolean(environment.getProperty("VAULT_ENABLED", "true"));
         response.put("credential_loaded", secret != null && !secret.isBlank());
         response.put("credential_source", vaultEnabled ? "VAULT" : "LOCAL_MOCK");
+        response.put("credential_required", vaultEnabled);
         return response;
     }
 
@@ -373,9 +532,42 @@ public class PerformanceExecutionService {
         }
         ExecutionRecord record = executions.get(id);
         if (record == null) {
-            throw new IllegalArgumentException("Ejecución no encontrada: " + id);
+            throw new IllegalArgumentException(
+                    "Ejecución no encontrada: " + id
+                            + ". El pod pudo reiniciarse o limpiar memoria. "
+                            + "Consulta /api/performance/executions/latest para recuperar el último log persistido."
+            );
         }
         return record;
+    }
+
+    private void markFailed(ExecutionRecord record, int exitCode, String summary, Throwable error, String vaultSecret) {
+        record.status = "FAILED";
+        record.exitCode = exitCode;
+        record.finishedAt = Instant.now();
+        record.lastErrorAt = Instant.now();
+        record.lastErrorType = error != null ? error.getClass().getSimpleName() : "EXECUTION_ERROR";
+        record.lastErrorSummary = summary;
+
+        appendLog(record.logFile, "[CONTROL] ERROR: " + summary);
+        if (error != null) {
+            String message = Objects.toString(error.getMessage(), "sin mensaje");
+            appendLog(record.logFile, "[CONTROL] ERROR_TYPE: " + error.getClass().getName());
+            appendLog(record.logFile, "[CONTROL] ERROR_MESSAGE: " + sanitizeLog(message, vaultSecret));
+            StackTraceElement[] stack = error.getStackTrace();
+            int maxLines = Math.min(stack.length, 20);
+            for (int i = 0; i < maxLines; i++) {
+                appendLog(record.logFile, "[CONTROL] STACK[" + i + "] " + stack[i]);
+            }
+            if (stack.length > maxLines) {
+                appendLog(record.logFile, "[CONTROL] STACK: ... " + (stack.length - maxLines) + " líneas omitidas");
+            }
+        }
+    }
+
+    private String runtimeHostName() {
+        String host = environment.getProperty("HOSTNAME");
+        return host == null || host.isBlank() ? "unknown-host" : host;
     }
 
     private void appendLog(Path logFile, String line) {
@@ -416,6 +608,9 @@ public class PerformanceExecutionService {
         private volatile Instant finishedAt;
         private volatile Integer exitCode;
         private volatile Process process;
+        private volatile String lastErrorType;
+        private volatile String lastErrorSummary;
+        private volatile Instant lastErrorAt;
 
         private ExecutionRecord(String id, String simulationClass, Path executionDirectory, Path logFile) {
             this.id = id;
@@ -433,7 +628,11 @@ public class PerformanceExecutionService {
             item.put("started_at", startedAt == null ? null : startedAt.toString());
             item.put("finished_at", finishedAt == null ? null : finishedAt.toString());
             item.put("exit_code", exitCode);
+            item.put("process_alive", process != null && process.isAlive());
             item.put("download_ready", "SUCCEEDED".equals(status) || "FAILED".equals(status));
+            item.put("error_type", lastErrorType);
+            item.put("error_summary", lastErrorSummary);
+            item.put("error_at", lastErrorAt == null ? null : lastErrorAt.toString());
             return item;
         }
     }

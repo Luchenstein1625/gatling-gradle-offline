@@ -40,10 +40,10 @@ services:
       VAULT_TRUST_STORE: "${VAULT_TRUST_STORE:-}"
       VAULT_TRUST_STORE_PWD: "${VAULT_TRUST_STORE_PWD:-}"
       PERFORMANCE_SIMULATIONS_DIR: /app/data/simulations
-      GATLING_COMMAND: /opt/gradle/gradle-8.14.3/bin/gradle
+      GATLING_COMMAND: /opt/gradle/bin/gradle
       GATLING_PROJECT_DIR: /app/gatling-runner
       SECURITY_PROJECT_DIR: /app/security-runner
-      SECURITY_GRADLE_COMMAND: /opt/gradle/gradle-8.14.3/bin/gradle
+      SECURITY_GRADLE_COMMAND: /opt/gradle/bin/gradle
       SECURITY_SCAN_TARGET: /app/app.jar
       SECURITY_REPORT_DIR: /app/data/security/reports
       SECURITY_DATA_DIR: /app/data/security/database
@@ -52,17 +52,7 @@ services:
       # Opcional pero recomendado para evitar límites de velocidad de NVD.
       NVD_API_KEY: "${NVD_API_KEY:-}"
       
-      # BCI Config Pass-throughs
-      BCI_LOGIN_URL: ${BCI_LOGIN_URL:-}
-      BCI_LOGIN_BASIC_AUTH: ${BCI_LOGIN_BASIC_AUTH:-LOCAL_MOCK_ONLY}
-      BCI_LOGIN_APPLICATION_ID: ${BCI_LOGIN_APPLICATION_ID:-Pruebas de Rendimiento Andes Cert}
-      BCI_LOGIN_CHANNEL: ${BCI_LOGIN_CHANNEL:-910}
-      BCI_LOGIN_REFERENCE_SERVICE: ${BCI_LOGIN_REFERENCE_SERVICE:-Pruebas de Rendimiento Andes Cert}
-      BCI_LOGIN_REFERENCE_OPERATION: ${BCI_LOGIN_REFERENCE_OPERATION:-111}
-      BCI_LOGIN_ORIGIN_ADDR: ${BCI_LOGIN_ORIGIN_ADDR:-111}
-      BCI_LOGIN_COOKIE: ${BCI_LOGIN_COOKIE:-}
-      BCI_LOGIN_X_IBM_CLIENT_ID: ${BCI_LOGIN_X_IBM_CLIENT_ID:-}
-      BCI_LOGIN_CLIENT_ID: ${BCI_LOGIN_CLIENT_ID:-}
+      # BCI API Config Pass-throughs
       BCI_API_BASE_URL: ${BCI_API_BASE_URL:-}
       BCI_API_APPLICATION_ID: ${BCI_API_APPLICATION_ID:-postman}
       BCI_API_CHANNEL: ${BCI_API_CHANNEL:-910}

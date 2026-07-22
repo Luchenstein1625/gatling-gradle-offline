@@ -63,11 +63,11 @@ spec:
         - name: PERFORMANCE_SIMULATIONS_DIR
           value: "/app/data/simulations"
         - name: GATLING_COMMAND
-          value: "/opt/gradle/gradle-8.14.3/bin/gradle"
+          value: "/opt/gradle/bin/gradle"
         - name: GATLING_PROJECT_DIR
           value: "/app/gatling-runner"
         - name: SECURITY_GRADLE_COMMAND
-          value: "/opt/gradle/gradle-8.14.3/bin/gradle"
+          value: "/opt/gradle/bin/gradle"
         - name: SECURITY_PROJECT_DIR
           value: "/app/security-runner"
         - name: SECURITY_SCAN_TARGET
@@ -84,8 +84,8 @@ spec:
           value: "file:/vol-ms/pubcerts.ts"
         - name: VAULT_TRUST_STORE_PWD
           value: "changeit"
-        - name: JAVA_TOOL_OPTIONS
-          value: "-XX:+UseG1GC -Xms32m -Xmx160m -XX:MaxMetaspaceSize=128m"
+        - name: GRADLE_OPTS
+          value: "-Xms128m -Xmx768m -XX:MaxMetaspaceSize=256m -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=1"
         livenessProbe:
           httpGet:
             path: /gatling/gatling-gen3-app/v0.1/health
@@ -117,7 +117,7 @@ spec:
             memory: 384Mi
           limits:
             cpu: "1"
-            memory: 768Mi
+            memory: 2048Mi
         securityContext:
           runAsNonRoot: true
           runAsGroup: 1001

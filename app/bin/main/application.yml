@@ -24,15 +24,31 @@ spring:
       app-role:
         role-id: ${VAULT_ROLE_ID}
         secret-id: ${VAULT_SECRET_ID}
-      kv:
-        enabled: true
-        backend: secret
       ssl:
         trust-store: ${VAULT_TRUST_STORE:}
         trust-store-password: ${VAULT_TRUST_STORE_PWD:}
       fail-fast: ${VAULT_FAIL_FAST:true}
       application-name: token_pruebas
-      profiles: ${VAULT_KV_PROFILES:qa}      
+
+  servlet:
+    multipart:
+      max-file-size: 1MB
+      max-request-size: 1MB
+
+performance:
+  simulations-dir: ${PERFORMANCE_SIMULATIONS_DIR:/app/data/simulations}
+  executions-dir: ${RESULTS_DIR:/app/data/executions}
+  gatling-command: ${GATLING_COMMAND:/opt/gradle/bin/gradle}
+  gatling-project-dir: ${GATLING_PROJECT_DIR:/app/gatling-runner}
+
+security:
+  scan:
+    gradle-command: ${SECURITY_GRADLE_COMMAND:/opt/gradle/bin/gradle}
+    project-dir: ${SECURITY_PROJECT_DIR:/app/security-runner}
+    report-dir: ${SECURITY_REPORT_DIR:/app/data/security/reports}
+    trivy-command: ${TRIVY_COMMAND:/usr/local/bin/trivy}
+    target: ${SECURITY_SCAN_TARGET:/app/app.jar}
+    trivy-cache-dir: ${TRIVY_CACHE_DIR:/app/data/security/trivy-cache}
 
 # Endpoint de health check expuesto en /health
 management:

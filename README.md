@@ -83,6 +83,15 @@ docker compose ps
 docker compose logs -f gatling-api
 ```
 
+Antes de construir, verificar que el contexto Docker incluya estas rutas requeridas por el Dockerfile:
+
+- `app/`
+- `gatling-runner/`
+- `offline-deps/gradle/gradle-8.14.3.tar.gz.part-*`
+- `offline-deps/gradle/gradle-cache.tar.gz.part-*`
+
+Si `gatling-runner/` o `offline-deps/` están excluidos en `.dockerignore`, el build puede fallar con errores tipo `COPY ... not found`.
+
 Cuando el contenedor esté `healthy`, abrir:
 
 - Menú: <http://localhost:8080/gatling/gatling-gen3-app/v0.1/>
@@ -237,6 +246,8 @@ chmod +x scripts/import-offline-images.sh scripts/offline-build.sh
 docker compose build --no-cache
 ```
 
+Nota: al transferir el repositorio al servidor, incluir también la carpeta `gatling-runner/` junto con `app/` y `offline-deps/`.
+
 También se puede usar el wrapper:
 
 ```bash
@@ -257,6 +268,36 @@ docker compose up -d
 ```
 
 Eso funcionará sin Internet únicamente cuando las imágenes base estén cargadas y `offline-deps/` esté completo.
+
+### Checklist pre-admin (antes de subir al cluster)
+
+1. Verificar que existen las partes offline:
+
+```bash
+ls -lh offline-deps/gradle/gradle-8.14.3.tar.gz.part-*
+ls -lh offline-deps/gradle/gradle-cache.tar.gz.part-*
+```
+
+2. Verificar que el contexto incluye carpetas requeridas por Dockerfile:
+
+```bash
+test -d app && echo "OK app"
+test -d gatling-runner && echo "OK gatling-runner"
+```
+
+3. Validar build estricto sin red:
+
+```bash
+docker build --no-cache --network none -f Dockerfile -t gatling-offline-verify .
+```
+
+4. Validar build por Compose (flujo operativo):
+
+```bash
+docker compose build
+```
+
+5. Solo si ambos comandos anteriores terminan en `BUILD SUCCESSFUL`/`Successfully built`, continuar con el push y despliegue en Kubernetes.
 
 ## 8. Publicar la imagen para AKS
 
